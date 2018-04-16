@@ -1,0 +1,15 @@
+﻿@model ErrorViewModel
+@{
+
+}
+<h1>Error!!</h1>
+<h2>Oh No! Something went wrong!</h2>
+
+@if (Model.ShowRequestId)
+{
+    <p>Request ID: @Model.RequestId</p>
+
+}
+
+<h3>Development Mode</h3>
+<p>Changing to Development enviroment will display more detailed information about the error.</p>
