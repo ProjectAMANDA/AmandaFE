@@ -19,6 +19,7 @@ namespace AmandaFE.Controllers
             _context = context;
         }
 
+        // TODO(taylorjoshuaw): Change userName to Id from user table
         public async Task<IActionResult> Index(string userName)
         {
             if (userName == null)
@@ -31,7 +32,7 @@ namespace AmandaFE.Controllers
                 var user = _context.User.Where(u => u.Name == userName);
             }
 
-            return View(user);
+            return View(userName);
         }
     }
 }
