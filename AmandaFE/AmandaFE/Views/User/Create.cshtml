@@ -1,5 +1,13 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model AmandaFE.Models.User
 @{
 }
+<h2>Create A New User</h2>
+<form asp-action="Create">
+    <label asp-for="Name"></label>
+    <input asp-for="Name" />
+    <span asp-validation-for="Name"></span>
+
+    <input type="submit" value="Create User"/>
+</form>
+
+<a asp-action="Index">Return to User Home</a>
