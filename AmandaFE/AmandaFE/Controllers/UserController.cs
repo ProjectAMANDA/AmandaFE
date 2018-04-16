@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AmandaFE.Data;
+using AmandaFE.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +12,26 @@ namespace AmandaFE.Controllers
 {
     public class UserController : Controller
     {
-        public IActionResult Index()
+        private readonly Data.BlogDBContext _context;
+
+        public UserController(BlogDBContext context)
         {
-            return View();
+            _context = context;
+        }
+
+        public async Task<IActionResult> Index(string userName)
+        {
+            if (userName == null)
+            {
+                return NotFound();
+            }
+
+            if(Request.Cookies[userName] != null)
+            {
+                var user = _context.User.Where(u => u.Name == userName);
+            }
+
+            return View(user);
         }
     }
 }
