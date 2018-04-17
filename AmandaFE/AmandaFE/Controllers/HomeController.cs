@@ -1,3 +1,4 @@
+using AmandaFE.Data;
 using AmandaFE.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -10,8 +11,19 @@ namespace AmandaFE.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly Data.BlogDBContext _context;
+
+        public HomeController(BlogDBContext context)
+        {
+            _context = context;
+        }
+
         public IActionResult Index()
         {
+            HomeViewModel vm = new HomeViewModel();
+
+            vm.LastTen = _context.Post.TakeLast(10);
+
             return View();
         }
 
