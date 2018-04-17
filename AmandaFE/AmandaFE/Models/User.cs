@@ -10,7 +10,6 @@ namespace AmandaFE.Models
         public int Id { get; set; }
 
         public ICollection<Post> Posts { get; set; }
-        public int PostIds { get; set; }
 
         public string Name { get; set; }
     }
