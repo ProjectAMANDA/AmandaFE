@@ -22,5 +22,8 @@ namespace AmandaFE.Models
         [RegularExpression(@".*(.*\w.*){10}.*", ErrorMessage = "Post must contain at least 10 non-whitespace characters")]
         [Required]
         public string PostContent { get; set; }
+
+        [Display(Name ="Enrich Post", Description = "Enriches post using Azure Cognitive Services and Related Articles")]
+        public bool EnrichPost { get; set; }
     }
 }

@@ -29,7 +29,8 @@ namespace AmandaFE.Controllers
 
             PostCreateViewModel vm = new PostCreateViewModel()
             {
-                UserName = user?.Name
+                UserName = user?.Name,
+                EnrichPost = true
             };
 
             return View(vm);
@@ -37,7 +38,7 @@ namespace AmandaFE.Controllers
 
         [HttpPost]
         public async Task<IActionResult> Create(
-            [Bind("UserName", "PostTitle", "PostContent")] PostCreateViewModel vm)
+            [Bind("UserName", "PostTitle", "PostContent", "EnrichPost")] PostCreateViewModel vm)
         {
             if (!ModelState.IsValid)
             {
@@ -67,7 +68,12 @@ namespace AmandaFE.Controllers
                 User = user
             };
 
-            // TODO(taylorjoshuaw): Add API calls to our custom backend API
+            // NOTE(taylorjoshuaw): Remove the "true" from this if statement when
+            //                      privacy user story is implemented
+            if (vm.EnrichPost || true)
+            {
+                // TODO(taylorjoshuaw): Add API calls to our custom backend API
+            }
 
             await _context.Post.AddAsync(post);
 
