@@ -39,6 +39,8 @@ namespace AmandaFE
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseStaticFiles();
+
             app.UseMvc(routes => routes.MapRoute(
                 name: "Default",
                 template: "{controller=Home}/{action=Index}/{id?}"
