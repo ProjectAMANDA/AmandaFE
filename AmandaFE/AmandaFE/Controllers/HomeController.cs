@@ -24,7 +24,7 @@ namespace AmandaFE.Controllers
 
             vm.LastTen = _context.Post.TakeLast(10);
 
-            return View();
+            return View(vm);
         }
 
         public IActionResult Error()
