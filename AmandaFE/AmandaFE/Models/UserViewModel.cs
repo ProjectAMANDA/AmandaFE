@@ -8,7 +8,7 @@ namespace AmandaFE.Models
 {
     public class UserViewModel
     {
-        public List<User> users;
-        public SelectList name;
+        public User User { get; set; }
+        public IEnumerable<Post> LastFive { get; set; }
     }
 }

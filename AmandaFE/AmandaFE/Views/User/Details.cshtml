@@ -1,5 +1,17 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model UserViewModel
 @{
+}
+
+<h2>@Model.User</h2>
+
+@foreach (var post in Model.LastFive)
+{
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">@post.Title</h4>
+            <p class="card-text">@post.Summary</p>
+            <a asp-controller="Blog" asp-action="Details" class="card-link">See More &rArr;</a>
+        </div>
+    </div>
+
 }

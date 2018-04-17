@@ -27,13 +27,28 @@ namespace AmandaFE.Controllers
 
         public async Task<IActionResult> Details(int? id)
         {
+            UserViewModel vm = new UserViewModel();
+
             if (id.HasValue)
             {
-                return View(await _context.User.FirstAsync(u => u.Id == id.Value));
-
+               vm.User = await _context.User.Include(u => u.Posts).FirstAsync(u => u.Id == id.Value);
+            }
+            else
+            {
+                vm.User = await Cookies.GetUserFromCookie(Request, _context);
             }
 
-            return View(await Cookies.GetUserFromCookie(Request, _context));
+            if(vm.User == null)
+            {
+                TempData["NotificationType"] = "alert-danger";
+                TempData["NotificationMessage"] = "Specified user was not found";
+                return RedirectToAction("Index", "Home");
+            }
+
+            vm.LastFive = vm.User.Posts.TakeLast(5);
+
+            return View(vm);
+
         }
 
         public IActionResult Create()
@@ -48,9 +63,9 @@ namespace AmandaFE.Controllers
             {
                 _context.Add(user);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Details");
             }
-            return View(user);
+            return RedirectToAction("Details");
         }
 
         public async Task<IActionResult> Edit(int? id)
