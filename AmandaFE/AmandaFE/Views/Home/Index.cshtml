@@ -1,5 +1,20 @@
-﻿@{
+﻿@model HomeViewModel
+@{
     ViewBag.Title = "Home";
 }
 
 <h4>Hello, world!</h4>
+
+@foreach (var post in Model.LastTen)
+{
+    <div class="jumbotron">
+        <h1 class="display-3">@post.Title</h1>
+        <p class="lead">@post.User - @post.CreationDate</p>
+        <hr class="my-4">
+        <p>@post.Summary</p>
+        <p class="lead">
+            <a class="btn btn-primary btn-lg" asp-controller="Blog" asp-action="Details" role="button">Learn more</a>
+        </p>
+    </div>
+
+}
