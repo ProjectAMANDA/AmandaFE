@@ -115,5 +115,20 @@ namespace AmandaFE.Controllers
 
             return View(post);
         }
+
+        public async Task<IActionResult> Find(string search)
+        {
+            var posts = from p in _context.Post
+                        select p;
+
+            if (!String.IsNullOrEmpty(search))
+            {
+                // Search for a match under either Title or Keywords
+                posts = posts.Where(s => (s.Title.Contains(search) || s.Keywords.Contains(search)));
+
+            }
+
+            return View(await posts.ToListAsync());
+        }
     }
 }
