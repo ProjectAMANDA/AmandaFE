@@ -20,44 +20,20 @@ namespace AmandaFE.Controllers
         }
 
         // TODO(taylorjoshuaw): Change userName to Id from user table
-        public async Task<IActionResult> Index(int? id)
+        public IActionResult Index()
         {
-            if (!id.HasValue)
-            {
-                return NotFound();
-            }
-
-            if(Request.Cookies[id.ToString()] != null)
-            {
-                try
-                {
-                    var user = await _context.User.FirstAsync(u => u.Id == id.Value);
-                    return View(user);
-                }
-                catch
-                {
-                    return NotFound();
-                }
-            }
-
-            return View();
+            return RedirectToAction("Details");
         }
 
         public async Task<IActionResult> Details(int? id)
         {
-            if (!id.HasValue)
+            if (id.HasValue)
             {
-                return NotFound();
+                return View(await _context.User.FirstAsync(u => u.Id == id.Value));
+
             }
 
-            var user = await _context.User.FirstAsync(u => u.Id == id.Value);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
+            return View(await Cookies.GetUserFromCookie(Request, _context));
         }
 
         public IActionResult Create()
@@ -135,7 +111,7 @@ namespace AmandaFE.Controllers
                 return NotFound();
             }
 
-            var user = await _context.User.FirstAsync(u => u.Id = id.Value);
+            var user = await _context.User.FirstAsync(u => u.Id == id.Value);
 
             if( user == null)
             {
