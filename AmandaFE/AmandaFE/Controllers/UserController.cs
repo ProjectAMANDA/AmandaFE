@@ -135,7 +135,7 @@ namespace AmandaFE.Controllers
                 return NotFound();
             }
 
-            var user = await _context.User.FirstAsync(u => u.Id = id.Value);
+            var user = await _context.User.FirstAsync(u => u.Id == id.Value);
 
             if( user == null)
             {
