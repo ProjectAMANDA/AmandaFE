@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AmandaFE.Models;
 using AmandaFE.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace AmandaFE.Controllers
 {
@@ -19,7 +20,7 @@ namespace AmandaFE.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            return View(_context.Post);
         }
 
         [HttpGet]
@@ -92,7 +93,27 @@ namespace AmandaFE.Controllers
             TempData["NotificationMessage"] = $"Successfully posted {post.Title}!";
 
             // TODO(taylorjoshuaw): Will change this to viewing the post the user just created
-            return RedirectToAction("Index");
+            return RedirectToAction("Details", new { post.Id });
+        }
+
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (!id.HasValue)
+            {
+                return RedirectToAction("Index");
+            }
+
+            Post post = await _context.Post.Include(p => p.User)
+                                           .FirstOrDefaultAsync(p => p.Id == id.Value);
+
+            if (post is null)
+            {
+                TempData["NotificationType"] = "alert-warning";
+                TempData["NotificationMessage"] = "Could not find the specified blog post.";
+                return RedirectToAction("Index");
+            }
+
+            return View(post);
         }
     }
 }

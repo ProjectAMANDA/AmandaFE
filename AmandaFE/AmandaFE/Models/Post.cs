@@ -12,7 +12,6 @@ namespace AmandaFE.Models
         public int UserId { get; set; }
         public User User { get; set; }
 
-        public int RelatedPostIds { get; set; }
         public ICollection<Post> RelatedPosts { get; set; }
 
         public int ImageIds { get; set; }
