@@ -20,19 +20,144 @@ namespace AmandaFE.Controllers
         }
 
         // TODO(taylorjoshuaw): Change userName to Id from user table
-        public async Task<IActionResult> Index(string userName)
+        public async Task<IActionResult> Index(int? id)
         {
-            if (userName == null)
+            if (!id.HasValue)
             {
                 return NotFound();
             }
 
-            if(Request.Cookies[userName] != null)
+            if(Request.Cookies[id.ToString()] != null)
             {
-                var user = _context.User.Where(u => u.Name == userName);
+                try
+                {
+                    var user = await _context.User.FirstAsync(u => u.Id == id.Value);
+                    return View(user);
+                }
+                catch
+                {
+                    return NotFound();
+                }
             }
 
-            return View(userName);
+            return View();
         }
+
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (!id.HasValue)
+            {
+                return NotFound();
+            }
+
+            var user = await _context.User.FirstAsync(u => u.Id == id.Value);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
+        }
+
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([Bind("Id,Name")] User user)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(user);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(user);
+        }
+
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (!id.HasValue)
+            {
+                return NotFound();
+            }
+
+            var user = await _context.User.FirstAsync(u => u.Id == id.Value);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] User user)
+        {
+            if (id != user.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(user);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!UserExists(user.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+
+                }
+
+                return RedirectToAction("Index");
+            }
+
+            return View(user);
+        }
+
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (!id.HasValue)
+            {
+                return NotFound();
+            }
+
+            var user = await _context.User.FirstAsync(u => u.Id = id.Value);
+
+            if( user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public async Task<IActionResult> DeleteConfirmation(int id)
+        {
+            var user = await _context.User.FirstAsync(u => u.Id == id);
+            _context.User.Remove(user);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        private bool UserExists(int id)
+        {
+            return _context.User.Any(u => u.Id == id);
+        }
+
     }
 }
