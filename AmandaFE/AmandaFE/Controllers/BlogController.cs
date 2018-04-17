@@ -25,15 +25,12 @@ namespace AmandaFE.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            Post post = new Post();
-
-            if (Request.Cookies.ContainsKey(Cookies.UserId) &&
-                Int32.TryParse(Request.Cookies[Cookies.UserId], out int userId))
+            Post post = new Post()
             {
-                User user = _context.User.FirstOrDefault(u => u.Id == userId);
-                post.UserId = userId;
-                post.User = user;
-            }
+                User = await Cookies.GetUserFromCookie(Request, _context)
+            };
+
+            return View(post);
         }
     }
 }
