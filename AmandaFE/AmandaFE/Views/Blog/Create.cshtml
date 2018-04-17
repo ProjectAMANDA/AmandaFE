@@ -1,5 +1,41 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model PostCreateViewModel
+
 @{
+    ViewBag.Title = "Create New Blog Post";
 }
+
+<div class="offset-xl-1 col-xl-10">
+    <div class="card">
+        <p class="card-header">Create new blog post</p>
+        <div class="card-body pb-0">
+            <form method="post" asp-action="Create">
+                <div asp-validation-summary="ModelOnly"></div>
+                <div class="form-group">
+                    <label asp-for="UserName"></label>
+                    <input asp-for="UserName" class="form-control"></input>
+                    <span class="text-danger" asp-validation-for="UserName"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="PostTitle"></label>
+                    <input asp-for="PostTitle" class="form-control"></input>
+                    <span class="text-danger" asp-validation-for="PostTitle"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="PostContent"></label>
+                    <textarea asp-for="PostContent" class="form-control" rows="15"></textarea>
+                    <span class="text-danger" asp-validation-for="PostContent"></span>
+                </div>
+                <div class="form-group form-inline row justify-content-end">
+                    <div class="form-group mr-3">
+                        <label asp-for="EnrichPost" class="col-auto"></label>
+                        <input asp-for="EnrichPost" class="form-control col-auto" />
+                    </div>
+                    <div class="form-group mr-3">
+                        <a asp-action="Index" class="btn btn-danger">Cancel</a>
+                        <button type="submit" class="btn btn-success ml-2">Save</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
