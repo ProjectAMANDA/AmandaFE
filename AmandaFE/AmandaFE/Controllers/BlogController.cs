@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using AmandaFE.Models;
 using AmandaFE.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http;
+using Newtonsoft.Json.Linq;
 
 namespace AmandaFE.Controllers
 {
@@ -69,12 +71,6 @@ namespace AmandaFE.Controllers
                 User = user
             };
 
-            // NOTE(taylorjoshuaw): Remove the "true" from this if statement when
-            //                      privacy user story is implemented
-            if (vm.EnrichPost || true)
-            {
-                // TODO(taylorjoshuaw): Add API calls to our custom backend API
-            }
 
             await _context.Post.AddAsync(post);
 
@@ -89,11 +85,66 @@ namespace AmandaFE.Controllers
                 return View(vm);
             }
 
-            TempData["NotificationType"] = "alert-success";
-            TempData["NotificationMessage"] = $"Successfully posted {post.Title}!";
+            if (!vm.EnrichPost)
+            {
+                TempData["NotificationType"] = "alert-success";
+                TempData["NotificationMessage"] = $"Successfully posted {post.Title}!";
+                return RedirectToAction("Details", new { post.Id });
+            }
 
-            // TODO(taylorjoshuaw): Will change this to viewing the post the user just created
-            return RedirectToAction("Details", new { post.Id });
+            return RedirectToAction("Enrich", new { post.Id });
+        }
+
+        public async Task<IActionResult> Enrich(int? id)
+        {
+            if (!id.HasValue)
+            {
+                return RedirectToAction("Index");
+            }
+
+            Post post = await _context.Post.FirstOrDefaultAsync(p => p.Id == id);
+
+            if (post is null)
+            {
+                TempData["NotificationType"] = "alert-warning";
+                TempData["NotificationMessage"] = "Could not find the specified blog post.";
+                return RedirectToAction("Index");
+            }
+
+            IEnumerable<string> imageHrefs;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("http://localhost:50063/api/");
+                client.DefaultRequestHeaders.Add("text", post.Content);
+
+                HttpResponseMessage response = await client.GetAsync("image");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    JArray apiArray = JArray.Parse(await response.Content.ReadAsStringAsync());
+                    imageHrefs = apiArray.ToList().Cast<string>();
+                }
+                else
+                {
+                    imageHrefs = new List<string>();
+                }
+            }
+
+            if (imageHrefs is null || imageHrefs.Count() < 1)
+            {
+                TempData["NotificationType"] = "alert-danger";
+                TempData["NotificationMessage"] = "Could not reach remote enrichment services. Please try again later.";
+                return RedirectToAction("Details", new { post.Id });
+            }
+
+            PostEnrichViewModel vm = new PostEnrichViewModel()
+            {
+                Post = post,
+                ImageHrefs = imageHrefs
+            };
+
+            return View(vm);
         }
 
         public async Task<IActionResult> Details(int? id)
