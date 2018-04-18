@@ -14,9 +14,7 @@ namespace AmandaFE.Models
 
         public ICollection<Post> RelatedPosts { get; set; }
 
-        // TODO(taylorjoshuaw): Change this name to ImageId
-        //                      and add new migration
-        public int ImageIds { get; set; }
+        public string ImageHref { get; set; }
 
         public string Title { get; set; }
         public string Summary { get; set; }

@@ -65,7 +65,7 @@ namespace AmandaFE.Controllers
             Post post = new Post()
             {
                 Content = vm.PostContent,
-                Summary = vm.PostContent.Substring(0, 20),
+                Summary = vm.PostContent.Substring(0, Math.Min(vm.PostContent.Length, 100)),
                 CreationDate = DateTime.Now,
                 Title = vm.PostTitle,
                 User = user
@@ -112,25 +112,7 @@ namespace AmandaFE.Controllers
                 return RedirectToAction("Index");
             }
 
-            IEnumerable<string> imageHrefs;
-
-            using (HttpClient client = new HttpClient())
-            {
-                client.BaseAddress = new Uri("http://localhost:50063/api/");
-                client.DefaultRequestHeaders.Add("text", post.Content);
-
-                HttpResponseMessage response = await client.GetAsync("image");
-
-                if (response.IsSuccessStatusCode)
-                {
-                    JArray apiArray = JArray.Parse(await response.Content.ReadAsStringAsync());
-                    imageHrefs = apiArray.ToObject<string[]>();
-                }
-                else
-                {
-                    imageHrefs = new string[0];
-                }
-            }
+            IEnumerable<string> imageHrefs = await BackendAPI.GetImageHrefs(post.Content);
 
             if (imageHrefs is null || imageHrefs.Count() < 1)
             {
@@ -167,13 +149,26 @@ namespace AmandaFE.Controllers
                 return RedirectToAction("Enrich", new { vm.PostId });
             }
 
-            // TODO(taylorjoshuaw): Once the API team adds image ID's to their response JSON,
-            //                      then we can start adding images to the Post table.
-            // post.ImageIds = {Insert image id here}
+            post.ImageHref = vm.SelectedImageHref;
+            _context.Post.Update(post);
 
-            TempData["NotificationType"] = "alert-warning";
-            TempData["NotificationMessage"] = $"Cannot store image id for the selected image. This functionality will be added shortly. The following image URL was chosen: {vm.SelectedImageHref}";
-            return RedirectToAction("Details", new { vm.PostId });
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch
+            {
+                TempData["NotificationType"] = "alert-danger";
+                TempData["NotificationMessage"] = $"Could not commit post enrichment to backend database. Please try again.";
+                vm.ImageHrefs = await BackendAPI.GetImageHrefs(post.Content);
+                vm.Post = post;
+
+                return View(vm);
+            }
+
+            TempData["NotificationType"] = "alert-success";
+            TempData["NotificationMessage"] = $"Successfully enriched {post.Title}";
+            return RedirectToAction("Details", new { id = vm.PostId });
         }
 
         public async Task<IActionResult> Details(int? id)
