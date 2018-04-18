@@ -1,10 +1,10 @@
 ﻿@model Post
 
 @{
-    ViewBag.Title = $"Read Post - {Model.Title}";
+    ViewBag.Title = $"Blog - Read Post: {Model.Title}";
 }
 
-<div class="offset-lg-2 col-lg-8 mt-5">
+<div class="offset-lg-2 col-lg-8">
     <div class="card">
         <div class="card-body pb-0">
             <div class="row justify-content-center">
@@ -23,6 +23,13 @@
             </div>
             <hr />
             <p>@Model.Content</p>
+            <img src="@Model.ImageHref" class="card-img-bottom" />
+            <div class="form-group form-inline row justify-content-end">
+                <div class="form-group mr-3">
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit Post</a>
+                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete Post</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>

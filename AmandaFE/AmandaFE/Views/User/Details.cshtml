@@ -1,16 +1,17 @@
 ﻿@model UserViewModel
 @{
+    ViewBag.Title = "Users - Details";
 }
 
-<h2>@Model.User</h2>
+<h2>@Model.User.Name</h2>
 
 @foreach (var post in Model.LastFive)
-{
+{   
     <div class="card">
         <div class="card-body">
             <h4 class="card-title">@post.Title</h4>
             <p class="card-text">@post.Summary</p>
-            <a asp-controller="Blog" asp-action="Details" class="card-link">See More &rArr;</a>
+            <a asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id" class="card-link">See More &rArr;</a>
         </div>
     </div>
 

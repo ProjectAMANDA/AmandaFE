@@ -20,8 +20,51 @@
 
 </head>
 <body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark position-sticky sticky-top">
+        <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+            <img src="~/images/LogoMd.png" class="mr-2" />
+            ProjectAMANDA
+        </a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav nav-pills mx-auto">
+                <li class="nav-item">
+                    <a asp-controller="Home" asp-action="Index" class="nav-link lead px-2 @(ViewBag.Title.StartsWith("Home") ? "active" : "")">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a asp-controller="Blog" asp-action="Index" class="nav-link lead px-2 @(ViewBag.Title.StartsWith("Blog") ? "active" : "")">Blogs</a>
+                </li>
+                <li class="nav-item">
+                    <a asp-controller="User" asp-action="Index" class="nav-link lead px-2 @(ViewBag.Title.StartsWith("User") ? "active" : "")">Users</a>
+                </li>
+            </ul>
+
+            <form method="get" class="form-inline ml-3" asp-controller="Blog" asp-action="Find">
+                <input class="form-control" placeholder="Search posts by keywords" type="text" />
+                <button class="btn btn-secondary ml-1" type="submit">Search</button>
+            </form>
+        </div>
+    </nav>
+
     <div class="container-fluid">
+        @if (TempData.ContainsKey("NotificationMessage"))
+        {
+            <div class="alert @(TempData.ContainsKey("NotificationType") ? TempData["NotificationType"] : "")">
+                @TempData["NotificationMessage"]
+            </div>
+        }
+        <br />
+
         @RenderBody()
+
+        <footer>
+            <strong>Copyright (C) 2018 Joshua Taylor, Philip Werner, and Arthur Allen.</strong>
+            <p><small>This website uses cookies as a user convenience to prevent having to repeatedly enter the user's name. These can be safely disabled in your browser without breaking any core functionality of this site.</small></p>
+        </footer>
     </div>
 </body>
 </html>

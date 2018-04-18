@@ -1,3 +1,20 @@
-﻿
+﻿@model Post
 @{
+    ViewBag.Title = $"Delete Post - {Model.Title}";
 }
+<h3>Post Details</h3>
+<hr />
+<dl class="d-lg-table">
+    <dt>@Html.DisplayNameFor(model => model.Title)</dt>
+    <dd>@Html.DisplayFor(model => model.Title)</dd>
+    <dt>@Html.DisplayNameFor(model => model.Content)</dt>
+    <dd>@Html.DisplayFor(model => model.Content)</dd>
+</dl>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="User" />
+    <input type="hidden" asp-for="UserId" />
+    <a asp-action="Index" class="btn btn-danger">Cancel</a>
+    <button type="submit" value="Delete" class="btn btn-success ml-2">Delete</button>
+</form>

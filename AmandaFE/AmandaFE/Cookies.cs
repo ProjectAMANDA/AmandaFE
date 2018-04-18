@@ -22,7 +22,7 @@ namespace AmandaFE
         /// <param name="context">The database context to use for finding the returned user</param>
         /// <returns>The User object from the database matching the user's UserId cookie or
         /// null if it is not found</returns>
-        public static async Task<User> GetUserFromCookie(HttpRequest request, BlogDBContext context)
+        public static async Task<User> GetUserFromCookieAsync(HttpRequest request, BlogDBContext context)
         {
             if (request is null || context is null)
             {
@@ -32,7 +32,8 @@ namespace AmandaFE
             if (request.Cookies.ContainsKey(UserId) &&
                 Int32.TryParse(request.Cookies[UserId], out int userId))
             {
-                return await context.User.FirstOrDefaultAsync(u => u.Id == userId);
+                return await context.User.Include(u => u.Posts)
+                                         .FirstOrDefaultAsync(u => u.Id == userId);
             }
             else
             {
@@ -40,6 +41,34 @@ namespace AmandaFE
             }
         }
 
-        // TODO(taylorjoshuaw): Add a WriteUserCookie method
+        public static async Task WriteUserCookieByIdAsync(int userId, HttpResponse response, BlogDBContext context)
+        {
+            if (response is null || context is null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            User user = await context.User.FindAsync(userId);
+
+            if (user != null)
+            {
+                response.Cookies.Append(UserId, userId.ToString());
+            }
+        }
+
+        public static async Task WriteUserCookieByNameAsync(string userName, HttpResponse response, BlogDBContext context)
+        {
+            if (string.IsNullOrWhiteSpace(userName) || response is null || context is null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            User user = await context.User.FirstOrDefaultAsync(u => u.Name == userName);
+
+            if (user != null)
+            {
+                response.Cookies.Append(UserId, user.Id.ToString());
+            }
+        }
     }
 }

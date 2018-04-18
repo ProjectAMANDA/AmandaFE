@@ -1,0 +1,35 @@
+﻿@model PostEnrichViewModel
+
+@{
+    ViewBag.Title = $"Blog - Enrichment Options for {Model.Post.Title}";
+}
+
+<h1 class="text-center">Please select an image to accompany your blog post</h1>
+
+
+<div class="row offset-2">
+    @foreach (var href in Model.ImageHrefs)
+    {
+        <div class="col-xl-5">
+            <div class="card mt-3">
+                <p class="card-header">Curated Image</p>
+                <form method="post" asp-action="Enrich">
+                    <input hidden asp-for="SelectedImageHref" value="@href" />
+                    <input hidden asp-for="PostId" value="@Model.PostId" />
+                    <input type="image" src="@href" class="card-img-top" />
+                </form>
+                <div class="card-body pb-0">
+                    <dl>
+                        <dt>Sentiment</dt>
+                        <dd>0.5</dd>
+                        <dt>Key Phrases</dt>
+                        <dd>cat blog stuff</dd>
+                        <dt>Some other stuff</dt>
+                        <dd>Will go here...</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
