@@ -22,7 +22,9 @@ namespace AmandaFE.Controllers
 
         public IActionResult Index()
         {
-            return View(_context.Post);
+            // TODO(taylorjoshuaw): Don't just redirect to home!
+            //return View(_context.Post);
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
