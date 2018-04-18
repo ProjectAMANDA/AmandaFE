@@ -35,7 +35,7 @@ namespace AmandaFE.Controllers
             }
             else
             {
-                vm.User = await Cookies.GetUserFromCookie(Request, _context);
+                vm.User = await Cookies.GetUserFromCookieAsync(Request, _context);
             }
 
             if(vm.User == null)

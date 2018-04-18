@@ -28,7 +28,7 @@ namespace AmandaFE.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            User user = await Cookies.GetUserFromCookie(Request, _context);
+            User user = await Cookies.GetUserFromCookieAsync(Request, _context);
 
             PostCreateViewModel vm = new PostCreateViewModel()
             {
@@ -84,6 +84,8 @@ namespace AmandaFE.Controllers
                 TempData["NotificationMessage"] = "Unable to commit new post to backend database. Please try again.";
                 return View(vm);
             }
+
+            await Cookies.WriteUserCookieByIdAsync(post.User.Id, Response, _context);
 
             if (!vm.EnrichPost)
             {
