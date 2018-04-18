@@ -7,8 +7,10 @@ namespace AmandaFE.Models
 {
     public class User
     {
-        public int PostIds { get; set; }
         public int Id { get; set; }
+
+        public ICollection<Post> Posts { get; set; }
+
         public string Name { get; set; }
     }
 }

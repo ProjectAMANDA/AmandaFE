@@ -1,5 +1,28 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model Post
+
 @{
+    ViewBag.Title = $"Read Post - {Model.Title}";
 }
+
+<div class="offset-lg-2 col-lg-8 mt-5">
+    <div class="card">
+        <div class="card-body pb-0">
+            <div class="row justify-content-center">
+                <h1>@Model.Title</h1>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-6">
+                    <a asp-controller="User" asp-action="Details" asp-route-id="@Model.UserId" class="h4">@Model.User.Name</a>
+                    <br />
+                    <strong>@Model.CreationDate</strong>
+                </div>
+                <div class="col-6 text-right">
+                    <h5>Keywords Will Go Here</h5>
+                </div>
+            </div>
+            <hr />
+            <p>@Model.Content</p>
+        </div>
+    </div>
+</div>
