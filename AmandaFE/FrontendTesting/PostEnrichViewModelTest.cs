@@ -73,7 +73,7 @@ namespace FrontendTesting
         }
 
         [Fact]
-        public void GetImageHrefsTest()
+        public void CanGetImageHrefsTest()
         {
             // Arrange
             PostEnrichViewModel vm = new PostEnrichViewModel()
@@ -82,7 +82,7 @@ namespace FrontendTesting
             };
 
             // Assert
-            Assert.Equal("https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png", vm.ImageHrefs.ToString());
+            Assert.Single(vm.ImageHrefs);
         }
     }
 }
