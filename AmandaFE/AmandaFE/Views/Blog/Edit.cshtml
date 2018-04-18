@@ -1,4 +1,4 @@
-﻿@model PostCreateViewModel
+﻿@model Post
 
 @{
     ViewBag.Title = "Edit Your Post";
@@ -8,31 +8,25 @@
     <div class="card">
         <p class="card-header">Edit Your Post</p>
         <div class="card-body pb-0">
-            <form method="put" asp-action="Edit">
+            <form asp-action="Edit">
                 <div asp-validation-summary="ModelOnly"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="User" />
+                <input type="hidden" asp-for="UserId" />
                 <div class="form-group">
-                    <label asp-for="UserName"></label>
-                    <input asp-for="UserName" class="form-control"></input>
-                    <span class="text-danger" asp-validation-for="UserName"></span>
+                    <label asp-for="Title"></label>
+                    <input asp-for="Title" class="form-control" />
+                    <span class="text-danger" asp-validation-for="Title"></span>
                 </div>
                 <div class="form-group">
-                    <label asp-for="PostTitle"></label>
-                    <input asp-for="PostTitle" class="form-control"></input>
-                    <span class="text-danger" asp-validation-for="PostTitle"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="PostContent"></label>
-                    <textarea asp-for="PostContent" class="form-control" rows="15"></textarea>
-                    <span class="text-danger" asp-validation-for="PostContent"></span>
+                    <label asp-for="Content"></label>
+                    <textarea asp-for="Content" class="form-control" rows="15"></textarea>
+                    <span class="text-danger" asp-validation-for="Content"></span>
                 </div>
                 <div class="form-group form-inline row justify-content-end">
                     <div class="form-group mr-3">
-                        <label asp-for="EnrichPost" class="col-auto"></label>
-                        <input asp-for="EnrichPost" class="form-control col-auto" />
-                    </div>
-                    <div class="form-group mr-3">
                         <a asp-action="Index" class="btn btn-danger">Cancel</a>
-                        <button type="submit" class="btn btn-success ml-2">Update</button>
+                        <button type="submit" value="Save" class="btn btn-success ml-2">Update</button>
                     </div>
                 </div>
             </form>
