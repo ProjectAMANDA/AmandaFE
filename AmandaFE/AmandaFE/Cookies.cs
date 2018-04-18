@@ -32,7 +32,8 @@ namespace AmandaFE
             if (request.Cookies.ContainsKey(UserId) &&
                 Int32.TryParse(request.Cookies[UserId], out int userId))
             {
-                return await context.User.FirstOrDefaultAsync(u => u.Id == userId);
+                return await context.User.Include(u => u.Posts)
+                                         .FirstOrDefaultAsync(u => u.Id == userId);
             }
             else
             {
