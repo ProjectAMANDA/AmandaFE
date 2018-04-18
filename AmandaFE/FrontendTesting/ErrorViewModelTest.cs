@@ -37,5 +37,18 @@ namespace FrontendTesting
             // Assert
             Assert.Equal("Goodbye", vm.RequestId);
         }
+
+        [Fact]
+        public void CanGetShowRequestId()
+        {
+            // Arrange
+            ErrorViewModel vm = new ErrorViewModel()
+            {
+                RequestId = "Hello"
+            };
+
+            // Assert
+            Assert.True(vm.ShowRequestId);
+        }
     }
 }
