@@ -14,7 +14,7 @@ namespace AmandaFE.Models
 
         public ICollection<Post> RelatedPosts { get; set; }
 
-        public int ImageIds { get; set; }
+        public string ImageHref { get; set; }
 
         public string Title { get; set; }
         public string Summary { get; set; }

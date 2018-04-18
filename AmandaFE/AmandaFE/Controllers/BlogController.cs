@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using AmandaFE.Models;
 using AmandaFE.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http;
+using Newtonsoft.Json.Linq;
 
 namespace AmandaFE.Controllers
 {
@@ -63,18 +65,12 @@ namespace AmandaFE.Controllers
             Post post = new Post()
             {
                 Content = vm.PostContent,
-                Summary = vm.PostContent.Substring(0, 20),
+                Summary = vm.PostContent.Substring(0, Math.Min(vm.PostContent.Length, 100)),
                 CreationDate = DateTime.Now,
                 Title = vm.PostTitle,
                 User = user
             };
 
-            // NOTE(taylorjoshuaw): Remove the "true" from this if statement when
-            //                      privacy user story is implemented
-            if (vm.EnrichPost || true)
-            {
-                // TODO(taylorjoshuaw): Add API calls to our custom backend API
-            }
 
             await _context.Post.AddAsync(post);
 
@@ -89,11 +85,90 @@ namespace AmandaFE.Controllers
                 return View(vm);
             }
 
-            TempData["NotificationType"] = "alert-success";
-            TempData["NotificationMessage"] = $"Successfully posted {post.Title}!";
+            if (!vm.EnrichPost)
+            {
+                TempData["NotificationType"] = "alert-success";
+                TempData["NotificationMessage"] = $"Successfully posted {post.Title}!";
+                return RedirectToAction("Details", new { post.Id });
+            }
 
-            // TODO(taylorjoshuaw): Will change this to viewing the post the user just created
-            return RedirectToAction("Details", new { post.Id });
+            return RedirectToAction("Enrich", new { post.Id });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Enrich(int? id)
+        {
+            if (!id.HasValue)
+            {
+                return RedirectToAction("Index");
+            }
+
+            Post post = await _context.Post.FirstOrDefaultAsync(p => p.Id == id);
+
+            if (post is null)
+            {
+                TempData["NotificationType"] = "alert-warning";
+                TempData["NotificationMessage"] = "Could not find the specified blog post.";
+                return RedirectToAction("Index");
+            }
+
+            IEnumerable<string> imageHrefs = await BackendAPI.GetImageHrefs(post.Content);
+
+            if (imageHrefs is null || imageHrefs.Count() < 1)
+            {
+                TempData["NotificationType"] = "alert-danger";
+                TempData["NotificationMessage"] = "Could not reach remote enrichment services, but successfully created blog post. Please try enrichment services later.";
+                return RedirectToAction("Details", new { post.Id });
+            }
+
+            PostEnrichViewModel vm = new PostEnrichViewModel()
+            {
+                Post = post,
+                PostId = post.Id,
+                ImageHrefs = imageHrefs
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Enrich(
+            [Bind("PostId", "SelectedImageHref")] PostEnrichViewModel vm)
+        {
+            if (vm is null)
+            {
+                return RedirectToAction("Index");
+            }
+
+            Post post = await _context.Post.FirstOrDefaultAsync(p => p.Id == vm.PostId);
+
+            if (post is null)
+            {
+                TempData["NotificationType"] = "alert-danger";
+                TempData["NotificationMessage"] = "Could not find the specified post to enrich. Please try again.";
+                return RedirectToAction("Enrich", new { vm.PostId });
+            }
+
+            post.ImageHref = vm.SelectedImageHref;
+            _context.Post.Update(post);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch
+            {
+                TempData["NotificationType"] = "alert-danger";
+                TempData["NotificationMessage"] = $"Could not commit post enrichment to backend database. Please try again.";
+                vm.ImageHrefs = await BackendAPI.GetImageHrefs(post.Content);
+                vm.Post = post;
+
+                return View(vm);
+            }
+
+            TempData["NotificationType"] = "alert-success";
+            TempData["NotificationMessage"] = $"Successfully enriched {post.Title}";
+            return RedirectToAction("Details", new { id = vm.PostId });
         }
 
         public async Task<IActionResult> Details(int? id)
