@@ -1,0 +1,10 @@
+﻿@model PostEnrichViewModel
+
+@{
+    ViewBag.Title = $"Enrichment Options for {Model.Post.Title}";
+}
+
+@foreach (var href in Model.ImageHrefs)
+{
+    <img src="@href" />
+}
