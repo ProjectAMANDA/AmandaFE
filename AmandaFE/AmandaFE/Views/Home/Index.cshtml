@@ -3,8 +3,6 @@
     ViewBag.Title = "Home";
 }
 
-<h4>Hello, world!</h4>
-
 @foreach (var post in Model.LastTen)
 {
     <div class="jumbotron">
@@ -13,7 +11,7 @@
         <hr class="my-4">
         <p>@post.Summary</p>
         <p class="lead">
-            <a class="btn btn-primary btn-lg" asp-controller="Blog" asp-action="Details" role="button">Learn more</a>
+            <a class="btn btn-primary btn-lg" asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id" role="button">Learn more</a>
         </p>
     </div>
 
