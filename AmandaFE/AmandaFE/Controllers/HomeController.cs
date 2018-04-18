@@ -22,7 +22,7 @@ namespace AmandaFE.Controllers
         {
             HomeViewModel vm = new HomeViewModel();
 
-            vm.LastTen = _context.Post.TakeLast(10);
+            vm.LastTen = _context.Post.OrderBy(p => p.CreationDate).Take(10);
 
             return View(vm);
         }
