@@ -21,6 +21,14 @@
 </head>
 <body>
     <div class="container-fluid">
+        @if (TempData.ContainsKey("NotificationMessage"))
+        {
+            <div class="alert @(TempData.ContainsKey("NotificationType") ? TempData["NotificationType"] : "")">
+                @TempData["NotificationMessage"]
+            </div>
+        }
+        <br />
+
         @RenderBody()
     </div>
 </body>

@@ -172,7 +172,7 @@ namespace AmandaFE.Controllers
             // post.ImageIds = {Insert image id here}
 
             TempData["NotificationType"] = "alert-warning";
-            TempData["NotificationMessage"] = $"Cannot store image id for {vm.SelectedImageHref} since the backend API does not provide it yet. Please try again on a later date. Sorry for the inconvenience.";
+            TempData["NotificationMessage"] = $"Cannot store image id for the selected image. This functionality will be added shortly. The following image URL was chosen: {vm.SelectedImageHref}";
             return RedirectToAction("Details", new { vm.PostId });
         }
 
