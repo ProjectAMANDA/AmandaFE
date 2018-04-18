@@ -123,18 +123,18 @@ namespace AmandaFE.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     JArray apiArray = JArray.Parse(await response.Content.ReadAsStringAsync());
-                    imageHrefs = apiArray.ToList().Cast<string>();
+                    imageHrefs = apiArray.ToObject<string[]>();
                 }
                 else
                 {
-                    imageHrefs = new List<string>();
+                    imageHrefs = new string[0];
                 }
             }
 
             if (imageHrefs is null || imageHrefs.Count() < 1)
             {
                 TempData["NotificationType"] = "alert-danger";
-                TempData["NotificationMessage"] = "Could not reach remote enrichment services. Please try again later.";
+                TempData["NotificationMessage"] = "Could not reach remote enrichment services, but successfully created blog post. Please try enrichment services later.";
                 return RedirectToAction("Details", new { post.Id });
             }
 
