@@ -24,6 +24,12 @@
             <hr />
             <p>@Model.Content</p>
             <img src="@Model.ImageHref" class="card-img-bottom" />
+            <div class="form-group form-inline row justify-content-end">
+                <div class="form-group mr-3">
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit Post</a>
+                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete Post</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -259,6 +259,33 @@ namespace AmandaFE.Controllers
             return View(post);
         }
 
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var post = await _context.Post.SingleOrDefaultAsync(p => p.Id == id);
+
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            return View(post);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var post = await _context.Post.SingleOrDefaultAsync(p => p.Id == id);
+            _context.Post.Remove(post);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
+
         private bool PostExists(int id)
         {
             return _context.Post.Any(p => p.Id == id);

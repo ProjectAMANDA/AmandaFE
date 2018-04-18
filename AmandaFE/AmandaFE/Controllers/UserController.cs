@@ -136,13 +136,13 @@ namespace AmandaFE.Controllers
             return View(user);
         }
 
-        [HttpPost, ActionName("Delete")]
+        [HttpDelete, ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirmation(int id)
         {
             var user = await _context.User.FirstAsync(u => u.Id == id);
             _context.User.Remove(user);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Home");
         }
 
         private bool UserExists(int id)
