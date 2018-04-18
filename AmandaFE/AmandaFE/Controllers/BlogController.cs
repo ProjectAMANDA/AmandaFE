@@ -95,6 +95,7 @@ namespace AmandaFE.Controllers
             return RedirectToAction("Enrich", new { post.Id });
         }
 
+        [HttpGet]
         public async Task<IActionResult> Enrich(int? id)
         {
             if (!id.HasValue)
@@ -141,10 +142,38 @@ namespace AmandaFE.Controllers
             PostEnrichViewModel vm = new PostEnrichViewModel()
             {
                 Post = post,
+                PostId = post.Id,
                 ImageHrefs = imageHrefs
             };
 
             return View(vm);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Enrich(
+            [Bind("PostId", "SelectedImageHref")] PostEnrichViewModel vm)
+        {
+            if (vm is null)
+            {
+                return RedirectToAction("Index");
+            }
+
+            Post post = await _context.Post.FirstOrDefaultAsync(p => p.Id == vm.PostId);
+
+            if (post is null)
+            {
+                TempData["NotificationType"] = "alert-danger";
+                TempData["NotificationMessage"] = "Could not find the specified post to enrich. Please try again.";
+                return RedirectToAction("Enrich", new { vm.PostId });
+            }
+
+            // TODO(taylorjoshuaw): Once the API team adds image ID's to their response JSON,
+            //                      then we can start adding images to the Post table.
+            // post.ImageIds = {Insert image id here}
+
+            TempData["NotificationType"] = "alert-warning";
+            TempData["NotificationMessage"] = $"Cannot store image id for {vm.SelectedImageHref} since the backend API does not provide it yet. Please try again on a later date. Sorry for the inconvenience.";
+            return RedirectToAction("Details", new { vm.PostId });
         }
 
         public async Task<IActionResult> Details(int? id)
