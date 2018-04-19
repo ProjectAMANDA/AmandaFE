@@ -123,5 +123,29 @@ namespace AmandaFE
             // Commit any added PostKeyword relational entities
             await context.SaveChangesAsync();
         }
+
+        /// <summary>
+        /// Find all post id's by keyword id. Returns null if the context is null.
+        /// </summary>
+        /// <param name="keywordId">The id of the keyword to search by</param>
+        /// <param name="context">The database context to operate on</param>
+        /// <returns>A collection of post id's with the specified keyword</returns>
+        public static async Task<ICollection<int>> GetPostIdsByKeywordIdAsync(int keywordId, BlogDBContext context) =>
+            await context?.PostKeyword.Where(pk => pk.KeywordId == keywordId)
+                                      .Select(pk => pk.PostId)
+                                      .ToListAsync();
+
+        /// <summary>
+        /// Find all posts that match any of the provided keyword id's. Returns null if the context is null
+        /// </summary>
+        /// <param name="keywordIds">An enumerable of keyword id's to match against posts in the database</param>
+        /// <param name="context">The database context to operate on</param>
+        /// <returns>A list of post id's matching any of the provided keyword id's. Returns null if the context is null.</returns>
+        public static async Task<ICollection<int>> GetPostIdsByMultipleKeywordIdsAsync(IEnumerable<int> keywordIds, BlogDBContext context) =>
+            await context?.Post.Include(p => p.PostKeywords)
+                               .SelectMany(p => p.PostKeywords)
+                               .Where(pk => keywordIds.Contains(pk.KeywordId))
+                               .Select(pk => pk.PostId)
+                               .ToListAsync();
     }
 }
