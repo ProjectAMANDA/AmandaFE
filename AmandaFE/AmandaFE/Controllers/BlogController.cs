@@ -43,7 +43,6 @@ namespace AmandaFE.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
             [Bind("UserName", "PostTitle", "PostContent", "EnrichPost", "Keywords")] PostCreateViewModel vm)
         {
@@ -138,7 +137,6 @@ namespace AmandaFE.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Enrich(
             [Bind("PostId", "SelectedImageHref")] PostEnrichViewModel vm)
         {
@@ -200,6 +198,7 @@ namespace AmandaFE.Controllers
             {
                 Post = post,
                 Keywords = await _context.PostKeyword.Include(pk => pk.Keyword)
+                                                     .Where(pk => pk.PostId == post.Id)
                                                      .Select(pk => pk.Keyword)
                                                      .ToListAsync()
 
