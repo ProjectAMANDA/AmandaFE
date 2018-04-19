@@ -30,7 +30,8 @@ namespace AmandaFE.Controllers
                 return View(new PostIndexViewModel()
                 {
                     Posts = await _context.Post.Include(p => p.User)
-                                               .ToListAsync()
+                                               .ToListAsync(),
+                    PostKeywords = _context.PostKeyword
                 });
             }
 
@@ -38,13 +39,31 @@ namespace AmandaFE.Controllers
             {
                 SearchKeywordString = searchKeywordString,
                 SearchUserName = searchUserName,
-                Posts = new List<Post>()
+                Posts = new List<Post>(),
+                PostKeywords = _context.PostKeyword
             };
 
             if (!string.IsNullOrWhiteSpace(searchKeywordString))
             {
                 vm.Posts = await KeywordUtilities.GetPostsByKeywordStringAsync(
                     searchKeywordString, _context);
+            }
+            if (!string.IsNullOrWhiteSpace(searchUserName))
+            {
+                if (vm.Posts.Any())
+                {
+                    vm.Posts = await vm.Posts.AsParallel()
+                                             .Where(p => p.User.Name.Contains(searchUserName))
+                                             .ToAsyncEnumerable()
+                                             .ToList();
+                }
+                else
+                {
+                    vm.Posts = await _context.Post.Include(p => p.User)
+                                                  .Include(p => p.PostKeywords)
+                                                  .Where(p => p.User.Name.Contains(searchUserName))
+                                                  .ToListAsync();
+                }
             }
 
             // TODO(taylorjoshuaw): Add searching by username

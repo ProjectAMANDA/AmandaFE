@@ -167,6 +167,7 @@ namespace AmandaFE
                                                          .ToListAsync();
 
             return await context.Post.Include(p => p.User)
+                                     .Include(p => p.PostKeywords)
                                      .Where(p => postIds.Contains(p.Id))
                                      .ToListAsync();
         }
