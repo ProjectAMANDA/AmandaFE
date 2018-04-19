@@ -1,35 +1,41 @@
-﻿@model Post
+﻿@model PostDetailViewModel
 
 @{
-    ViewBag.Title = $"Blog - Read Post: {Model.Title}";
+    ViewBag.Title = $"Blog - Read Post: {Model.Post.Title}";
 }
 
 <div class="offset-lg-2 col-lg-8">
     <div class="card">
         <div class="card-body pb-0">
             <div class="row justify-content-center">
-                <h1>@Model.Title</h1>
+                <h1>@Model.Post.Title</h1>
             </div>
             <hr />
             <div class="row">
                 <div class="col-6">
-                    <a asp-controller="User" asp-action="Details" asp-route-id="@Model.UserId" class="h4">@Model.User.Name</a>
+                    <a asp-controller="User" asp-action="Details" asp-route-id="@Model.Post.UserId" class="h4">@Model.Post.User.Name</a>
                     <br />
-                    <strong>@Model.CreationDate</strong>
+                    <strong>@Model.Post.CreationDate</strong>
                 </div>
                 <div class="col-6 text-right">
                     <h5>Keywords Will Go Here</h5>
                 </div>
             </div>
             <hr />
-            <p>@Model.Content</p>
-            <img src="@Model.ImageHref" class="card-img-bottom" />
+            <p>@Model.Post.Content</p>
+            <img src="@Model.Post.ImageHref" class="card-img-bottom" />
             <div class="form-group form-inline row justify-content-end">
                 <div class="form-group mr-3">
-                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit Post</a>
-                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete Post</a>
+                    <a asp-action="Edit" asp-route-id="@Model.Post.Id" class="btn btn-warning">Edit Post</a>
+                    <a asp-action="Delete" asp-route-id="@Model.Post.Id" class="btn btn-danger">Delete Post</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@foreach (var keyword in Model.Keywords)
+{
+    @keyword.Text
+    <br />
+}
