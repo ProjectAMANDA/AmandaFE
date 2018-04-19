@@ -20,9 +20,22 @@ namespace AmandaFE.Controllers
         }
 
         // TODO(taylorjoshuaw): Change userName to Id from user table
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return RedirectToAction("Details");
+            UserViewModel vm = new UserViewModel();
+            try
+            {
+                vm.User = await Cookies.GetUserFromCookieAsync(Request, _context);
+
+                vm.AllPosts = vm.User.Posts;
+                return View(vm);
+            }
+            catch
+            {
+                return View();
+            }
+            
+
         }
 
         public async Task<IActionResult> Details(int? id)
