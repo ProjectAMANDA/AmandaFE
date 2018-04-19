@@ -8,6 +8,7 @@ using AmandaFE.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
 
 namespace AmandaFE.Controllers
 {
@@ -42,6 +43,7 @@ namespace AmandaFE.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
             [Bind("UserName", "PostTitle", "PostContent", "EnrichPost")] PostCreateViewModel vm)
         {
@@ -72,7 +74,6 @@ namespace AmandaFE.Controllers
                 Title = vm.PostTitle,
                 User = user
             };
-
 
             await _context.Post.AddAsync(post);
 
@@ -136,6 +137,7 @@ namespace AmandaFE.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Enrich(
             [Bind("PostId", "SelectedImageHref")] PostEnrichViewModel vm)
         {
