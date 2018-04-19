@@ -20,7 +20,7 @@
 
 </head>
 <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark position-sticky sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark position-sticky sticky-top">
         <a class="navbar-brand" asp-controller="Home" asp-action="Index">
             <img src="~/images/LogoMd.png" class="mr-2" />
             ProjectAMANDA
@@ -43,8 +43,9 @@
                 </li>
             </ul>
 
-            <form method="get" class="form-inline ml-3" asp-controller="Blog" asp-action="Find">
-                <input class="form-control" placeholder="Search posts by keywords" type="text" />
+            <form method="get" class="form-inline ml-3" asp-controller="Blog" asp-action="Index">
+                <input name="searchUserName" class="form-control" placeholder="Search by user" type="text" />
+                <input name="searchKeywordString" class="form-control ml-1" placeholder="Search by keywords" type="text" />
                 <button class="btn btn-secondary ml-1" type="submit">Search</button>
             </form>
         </div>

@@ -21,11 +21,54 @@ namespace AmandaFE.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string searchKeywordString,
+            string searchUserName, int? page)
         {
-            // TODO(taylorjoshuaw): Don't just redirect to home!
-            //return View(_context.Post);
-            return RedirectToAction("Index", "Home");
+            if (string.IsNullOrWhiteSpace(searchKeywordString) &&
+                string.IsNullOrWhiteSpace(searchUserName))
+            {
+                return View(new PostIndexViewModel()
+                {
+                    Posts = await _context.Post.Include(p => p.User)
+                                               .ToListAsync(),
+                    PostKeywords = _context.PostKeyword
+                });
+            }
+
+            PostIndexViewModel vm = new PostIndexViewModel()
+            {
+                SearchKeywordString = searchKeywordString,
+                SearchUserName = searchUserName,
+                Posts = new List<Post>(),
+                PostKeywords = _context.PostKeyword
+            };
+
+            if (!string.IsNullOrWhiteSpace(searchKeywordString))
+            {
+                vm.Posts = await KeywordUtilities.GetPostsByKeywordStringAsync(
+                    searchKeywordString, _context);
+            }
+            if (!string.IsNullOrWhiteSpace(searchUserName))
+            {
+                if (vm.Posts.Any())
+                {
+                    vm.Posts = await vm.Posts.AsParallel()
+                                             .Where(p => p.User.Name.Contains(searchUserName))
+                                             .ToAsyncEnumerable()
+                                             .ToList();
+                }
+                else
+                {
+                    vm.Posts = await _context.Post.Include(p => p.User)
+                                                  .Include(p => p.PostKeywords)
+                                                  .Where(p => p.User.Name.Contains(searchUserName))
+                                                  .ToListAsync();
+                }
+            }
+
+            // TODO(taylorjoshuaw): Add searching by username
+
+            return View(vm);
         }
 
         [HttpGet]

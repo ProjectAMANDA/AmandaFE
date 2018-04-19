@@ -123,5 +123,53 @@ namespace AmandaFE
             // Commit any added PostKeyword relational entities
             await context.SaveChangesAsync();
         }
+
+        /// <summary>
+        /// Find all post id's by keyword id. Returns null if the context is null.
+        /// </summary>
+        /// <param name="keywordId">The id of the keyword to search by</param>
+        /// <param name="context">The database context to operate on</param>
+        /// <returns>A collection of post id's with the specified keyword</returns>
+        public static async Task<ICollection<int>> GetPostIdsByKeywordIdAsync(int keywordId, BlogDBContext context) =>
+            await context?.PostKeyword.Where(pk => pk.KeywordId == keywordId)
+                                      .Select(pk => pk.PostId)
+                                      .ToListAsync();
+
+        /// <summary>
+        /// Find all posts that match any of the provided keyword id's. Returns null if the context is null
+        /// </summary>
+        /// <param name="keywordIds">An enumerable of keyword id's to match against posts in the database</param>
+        /// <param name="context">The database context to operate on</param>
+        /// <returns>A list of post id's matching any of the provided keyword id's. Returns null if the context is null.</returns>
+        public static async Task<ICollection<int>> GetPostIdsByMultipleKeywordIdsAsync(IEnumerable<int> keywordIds, BlogDBContext context) =>
+            await context?.Post.Include(p => p.PostKeywords)
+                               .SelectMany(p => p.PostKeywords)
+                               .Where(pk => keywordIds.Contains(pk.KeywordId))
+                               .Select(pk => pk.PostId)
+                               .ToListAsync();
+
+        /// <summary>
+        /// Gets all posts which have keywords contained by the provided keyword string
+        /// </summary>
+        /// <param name="keywordString">String containing one or more keywords</param>
+        /// <param name="context">Database context to operate on</param>
+        /// <returns>A collection of Post entities joined by Post.User</returns>
+        public static async Task<ICollection<Post>> GetPostsByKeywordStringAsync(string keywordString, BlogDBContext context)
+        {
+            if (context is null)
+            {
+                return null;
+            }
+
+            List<int> postIds = await context.PostKeyword.Include(pk => pk.Keyword)
+                                                         .Where(pk => keywordString.Contains(pk.Keyword.Text))
+                                                         .Select(pk => pk.PostId)
+                                                         .ToListAsync();
+
+            return await context.Post.Include(p => p.User)
+                                     .Include(p => p.PostKeywords)
+                                     .Where(p => postIds.Contains(p.Id))
+                                     .ToListAsync();
+        }
     }
 }

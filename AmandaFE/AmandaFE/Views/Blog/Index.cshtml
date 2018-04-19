@@ -1,5 +1,41 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model PostIndexViewModel
+
 @{
+    ViewBag.Title = "Blog - Viewing Posts";
 }
+
+<h3>Viewing all posts...</h3>
+@if (!string.IsNullOrWhiteSpace(Model.SearchUserName))
+{
+    <h5>➥ by @Model.SearchUserName</h5>
+}
+@if (!string.IsNullOrWhiteSpace(Model.SearchKeywordString))
+{
+    <h5>➥ with any of the following keywords: <small class="text-muted">@Model.SearchKeywordString</small></h5>
+}
+<br />
+
+<div class="row">
+    @foreach (var post in Model.Posts)
+    {
+        <div class="mb-3 col-lg-5 col-sm-10 mx-auto">
+            <div class="card">
+                <div class="card-body py-3">
+                    <h4 class="card-title">@post.Title</h4>
+                    <h6 class="card-subtitle">Posted by @post.User.Name on @post.CreationDate</h6>
+                    <br />
+                    @post.Summary
+                </div>
+                <div class="card-footer">
+                    @foreach (var keyword in Model.PostKeywords.Include(pk => pk.Keyword)
+                                                            .Where(pk => pk.PostId == post.Id)
+                                                            .Select(pk => pk.Keyword)
+                                                            .ToList())
+                    {
+                        <a class="badge-pill badge-primary" asp-controller="Blog" asp-action="Index" asp-route-searchKeywordString="@keyword.Text">@keyword.Text</a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
