@@ -58,10 +58,13 @@ namespace AmandaFE.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
+            // TODO(taylorjoshuaw): Flesh out the user details view more. Temporarily just search on user
+            return RedirectToAction("Index", "Blog", new { searchUserName = vm.User.Name });
+            /*
             vm.LastFive = vm.User.Posts.TakeLast(5);
 
             return View(vm);
-
+            */
         }
 
         public IActionResult Create()
