@@ -9,8 +9,10 @@ namespace AmandaFE.Data
 {
     public class BlogDBContext : DbContext
     {
-        public DbSet<AmandaFE.Models.Post> Post { get; set; }
-        public DbSet<AmandaFE.Models.User> User { get; set; }
+        public DbSet<Post> Post { get; set; }
+        public DbSet<User> User { get; set; }
+        public DbSet<Keyword> Keyword { get; set; }
+        public DbSet<PostKeyword> PostKeyword { get; set; }
 
         public BlogDBContext(DbContextOptions<BlogDBContext> options) : base(options)
         {
