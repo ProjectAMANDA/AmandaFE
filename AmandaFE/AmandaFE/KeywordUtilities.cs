@@ -147,5 +147,28 @@ namespace AmandaFE
                                .Where(pk => keywordIds.Contains(pk.KeywordId))
                                .Select(pk => pk.PostId)
                                .ToListAsync();
+
+        /// <summary>
+        /// Gets all posts which have keywords contained by the provided keyword string
+        /// </summary>
+        /// <param name="keywordString">String containing one or more keywords</param>
+        /// <param name="context">Database context to operate on</param>
+        /// <returns>A collection of Post entities joined by Post.User</returns>
+        public static async Task<ICollection<Post>> GetPostsByKeywordStringAsync(string keywordString, BlogDBContext context)
+        {
+            if (context is null)
+            {
+                return null;
+            }
+
+            List<int> postIds = await context.PostKeyword.Include(pk => pk.Keyword)
+                                                         .Where(pk => keywordString.Contains(pk.Keyword.Text))
+                                                         .Select(pk => pk.PostId)
+                                                         .ToListAsync();
+
+            return await context.Post.Include(p => p.User)
+                                     .Where(p => postIds.Contains(p.Id))
+                                     .ToListAsync();
+        }
     }
 }

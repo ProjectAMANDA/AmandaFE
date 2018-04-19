@@ -21,11 +21,35 @@ namespace AmandaFE.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string searchKeywordString,
+            string searchUserName, int? page)
         {
-            // TODO(taylorjoshuaw): Don't just redirect to home!
-            //return View(_context.Post);
-            return RedirectToAction("Index", "Home");
+            if (string.IsNullOrWhiteSpace(searchKeywordString) &&
+                string.IsNullOrWhiteSpace(searchUserName))
+            {
+                return View(new PostIndexViewModel()
+                {
+                    Posts = await _context.Post.Include(p => p.User)
+                                               .ToListAsync()
+                });
+            }
+
+            PostIndexViewModel vm = new PostIndexViewModel()
+            {
+                SearchKeywordString = searchKeywordString,
+                SearchUserName = searchUserName,
+                Posts = new List<Post>()
+            };
+
+            if (!string.IsNullOrWhiteSpace(searchKeywordString))
+            {
+                vm.Posts = await KeywordUtilities.GetPostsByKeywordStringAsync(
+                    searchKeywordString, _context);
+            }
+
+            // TODO(taylorjoshuaw): Add searching by username
+
+            return View(vm);
         }
 
         [HttpGet]
