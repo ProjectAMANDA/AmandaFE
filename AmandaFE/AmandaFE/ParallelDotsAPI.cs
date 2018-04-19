@@ -7,7 +7,7 @@ namespace AmandaFE
 {
     public class ParallelDotsAPI
     {
-        public static IEnumerable<string> GetTags(string text)
+        public static IEnumerable<string> GenerateTags(string text)
         {
             paralleldots pd = new paralleldots("kB9ZXk2RErNglHtNOCLMqCb0S7SDUBDtZJ5B5dJbWMU");
             JToken keywords = JObject.Parse(pd.keywords(text));
