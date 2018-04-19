@@ -29,6 +29,16 @@ namespace AmandaFE.Data
 
             modelBuilder.Entity<PostKeyword>()
                 .HasKey(k => new { k.PostId, k.KeywordId });
+
+            modelBuilder.Entity<PostKeyword>()
+                .HasOne(pk => pk.Keyword)
+                .WithMany(k => k.PostKeywords)
+                .HasForeignKey(pk => pk.KeywordId);
+
+            modelBuilder.Entity<PostKeyword>()
+                .HasOne(pk => pk.Post)
+                .WithMany(p => p.PostKeywords)
+                .HasForeignKey(pk => pk.PostId);
         }
     }
 }

@@ -26,6 +26,8 @@ namespace AmandaFE
                 throw new ArgumentNullException();
             }
 
+            keywordText = keywordText.ToLower().Trim();
+
             Keyword keyword = await context.Keyword.Include(k => k.PostKeywords)
                                                    .FirstOrDefaultAsync(k => k.Text == keywordText);
 
@@ -34,6 +36,8 @@ namespace AmandaFE
             {
                 keyword = new Keyword() { Text = keywordText };
                 await context.Keyword.AddAsync(keyword);
+                // TODO(taylorjoshuaw): This shouldn't be needed!
+                await context.SaveChangesAsync();
             }
 
             return keyword;
@@ -65,16 +69,23 @@ namespace AmandaFE
             {
                 postKeyword = new PostKeyword()
                 {
+                    // TODO(taylorjoshuaw): Add check to make sure these id's exist
+                    KeywordId = keywordId,
+                    PostId = postId
+                    /* This way doesn't work.... :(
                     Keyword = await context.Keyword.Include(k => k.PostKeywords)
                                                    .FirstOrDefaultAsync(k => k.Id == keywordId) ??
                                                    throw new KeyNotFoundException("Provided keywordId could not be found in the database"),
 
                     Post = await context.Post.Include(p => p.PostKeywords)
-                                          .FirstOrDefaultAsync(p => p.Id == postId) ??
-                                          throw new KeyNotFoundException("Provided postId could not be found in the database")
+                                             .FirstOrDefaultAsync(p => p.Id == postId) ??
+                                             throw new KeyNotFoundException("Provided postId could not be found in the database")
+                    */
                 };
 
                 await context.AddAsync(postKeyword);
+                // TODO(taylorjoshuaw): This shouldn't be needed!
+                await context.SaveChangesAsync();
             }
 
             return postKeyword;
@@ -97,9 +108,9 @@ namespace AmandaFE
 
             List<Keyword> keywords = new List<Keyword>();
 
-            foreach (string token in Regex.Split(keywordString, @"\w*,\w*"))
+            foreach (string token in keywordString.Split(','))
             {
-                keywords.Append(await GetOrCreateKeywordAsync(token, context));
+                keywords.Add(await GetOrCreateKeywordAsync(token, context));
             }
 
             // Commit the new keyword entities (if there are any)

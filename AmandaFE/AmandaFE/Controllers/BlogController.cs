@@ -186,6 +186,7 @@ namespace AmandaFE.Controllers
             }
 
             Post post = await _context.Post.Include(p => p.User)
+                                           .Include(p => p.PostKeywords)
                                            .FirstOrDefaultAsync(p => p.Id == id.Value);
 
             if (post is null)
@@ -195,7 +196,21 @@ namespace AmandaFE.Controllers
                 return RedirectToAction("Index");
             }
 
-            return View(post);
+            PostDetailViewModel vm = new PostDetailViewModel()
+            {
+                Post = post,
+                Keywords = await _context.PostKeyword.Include(pk => pk.Keyword)
+                                                     .Select(pk => pk.Keyword)
+                                                     .ToListAsync()
+
+                /* This is how it will be done in the Edit action
+                KeywordString = string.Join(", ", _context.PostKeyword.Include(pk => pk.Keyword)
+                                                                      .Select(pk => pk.Keyword)
+                                                                      .ToList())
+                */
+            };
+
+            return View(vm);
         }
 
         public async Task<IActionResult> Find(string search)
@@ -222,7 +237,7 @@ namespace AmandaFE.Controllers
 
             var post = await _context.Post.SingleOrDefaultAsync(p => p.Id == id);
 
-            if( post == null)
+            if (post == null)
             {
                 return NotFound();
             }
