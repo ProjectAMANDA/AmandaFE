@@ -8,6 +8,7 @@ using AmandaFE.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
 
 namespace AmandaFE.Controllers
 {
@@ -43,7 +44,7 @@ namespace AmandaFE.Controllers
 
         [HttpPost]
         public async Task<IActionResult> Create(
-            [Bind("UserName", "PostTitle", "PostContent", "EnrichPost")] PostCreateViewModel vm)
+            [Bind("UserName", "PostTitle", "PostContent", "EnrichPost", "Keywords")] PostCreateViewModel vm)
         {
             if (!ModelState.IsValid)
             {
@@ -73,7 +74,6 @@ namespace AmandaFE.Controllers
                 User = user
             };
 
-
             await _context.Post.AddAsync(post);
 
             try
@@ -87,6 +87,7 @@ namespace AmandaFE.Controllers
                 return View(vm);
             }
 
+            await KeywordUtilities.MergeKeywordStringIntoPostAsync(vm.Keywords, post.Id, _context);
             await Cookies.WriteUserCookieByIdAsync(post.User.Id, Response, _context);
 
             if (!vm.EnrichPost)
@@ -183,6 +184,7 @@ namespace AmandaFE.Controllers
             }
 
             Post post = await _context.Post.Include(p => p.User)
+                                           .Include(p => p.PostKeywords)
                                            .FirstOrDefaultAsync(p => p.Id == id.Value);
 
             if (post is null)
@@ -192,7 +194,22 @@ namespace AmandaFE.Controllers
                 return RedirectToAction("Index");
             }
 
-            return View(post);
+            PostDetailViewModel vm = new PostDetailViewModel()
+            {
+                Post = post,
+                Keywords = await _context.PostKeyword.Include(pk => pk.Keyword)
+                                                     .Where(pk => pk.PostId == post.Id)
+                                                     .Select(pk => pk.Keyword)
+                                                     .ToListAsync()
+
+                /* This is how it will be done in the Edit action
+                KeywordString = string.Join(", ", _context.PostKeyword.Include(pk => pk.Keyword)
+                                                                      .Select(pk => pk.Keyword)
+                                                                      .ToList())
+                */
+            };
+
+            return View(vm);
         }
 
         public async Task<IActionResult> Find(string search)
@@ -203,7 +220,7 @@ namespace AmandaFE.Controllers
             if (!String.IsNullOrEmpty(search))
             {
                 // Search for a match under either Title or Keywords
-                posts = posts.Where(s => (s.Title.Contains(search) || s.Keywords.Contains(search)));
+                //posts = posts.Where(s => (s.Title.Contains(search) || s.Keyword.Contains(search)));
 
             }
 
@@ -219,7 +236,7 @@ namespace AmandaFE.Controllers
 
             var post = await _context.Post.SingleOrDefaultAsync(p => p.Id == id);
 
-            if( post == null)
+            if (post == null)
             {
                 return NotFound();
             }
@@ -236,27 +253,34 @@ namespace AmandaFE.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            Post existingPost = await _context.Post.FirstOrDefaultAsync(p => p.Id == id);
+
+            if (ModelState.IsValid && existingPost != null)
             {
                 try
                 {
-                    _context.Update(post);
+                    // Update the fields in the existing post based on the relevant
+                    // edited columns and update the date (might need a "ModifiedDate" in the future)
+                    existingPost.Title = post.Title;
+                    existingPost.Content = post.Content;
+                    existingPost.CreationDate = DateTime.Now;
+
+                    // TODO(taylorjoshuaw): Add tags here
+
+                    _context.Update(existingPost);
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
+                catch
                 {
-                    if (!PostExists(post.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    TempData["NotificationType"] = "alert-danger";
+                    TempData["NotificationMessage"] = "Unable to commit changes to backend database. Please try again.";
+                    return View(existingPost);
                 }
-                return RedirectToAction(nameof(Index));
+
+                return RedirectToAction("Details", new { id });
             }
-            return View(post);
+
+            return View(existingPost);
         }
 
         public async Task<IActionResult> Delete(int? id)
