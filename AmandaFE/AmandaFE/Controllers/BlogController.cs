@@ -45,7 +45,7 @@ namespace AmandaFE.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            [Bind("UserName", "PostTitle", "PostContent", "EnrichPost")] PostCreateViewModel vm)
+            [Bind("UserName", "PostTitle", "PostContent", "EnrichPost", "Keywords")] PostCreateViewModel vm)
         {
             if (!ModelState.IsValid)
             {
@@ -88,6 +88,7 @@ namespace AmandaFE.Controllers
                 return View(vm);
             }
 
+            await KeywordUtilities.MergeKeywordStringIntoPostAsync(vm.Keywords, post.Id, _context);
             await Cookies.WriteUserCookieByIdAsync(post.User.Id, Response, _context);
 
             if (!vm.EnrichPost)
