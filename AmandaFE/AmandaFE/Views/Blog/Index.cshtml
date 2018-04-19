@@ -1,7 +1,7 @@
 ﻿@model PostIndexViewModel
 
 @{
-    ViewBag.Title = "Blog - Viewing Posts";
+    ViewBag.Title = $"Blog - Viewing Posts";
 }
 
 <h3>Viewing all posts...</h3>
@@ -21,8 +21,8 @@
         <div class="mb-3 col-lg-5 col-sm-10 mx-auto">
             <div class="card">
                 <div class="card-body py-3">
-                    <h4 class="card-title">@post.Title</h4>
-                    <h6 class="card-subtitle">Posted by @post.User.Name on @post.CreationDate</h6>
+                    <a class="card-title h4" asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id">@post.Title</a>
+                    <h6 class="card-subtitle mt-1">Posted by <a asp-controller="User" asp-action="Details" asp-route-id="@post.User.Id">@post.User.Name</a> on @post.CreationDate</h6>
                     <br />
                     @post.Summary
                 </div>
