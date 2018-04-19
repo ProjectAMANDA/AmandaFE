@@ -1,2 +1,24 @@
-﻿@model User
+﻿@model UserViewModel
+@{
+    ViewBag.Title = "Users - Index";
+}
+<form method="get">
+    <div class="form-group">
+        <label class="col-form-label" for="inputDefault">Which user would you like to view?</label>
+        <input type="text" class="form-control" placeholder="Enter a name" id="inputDefault">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
 
+
+@foreach (var post in Model.AllPosts)
+{
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">@post.Title</h4>
+            <p class="card-text">@post.Summary</p>
+            <a asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id" class="card-link">See More &rArr;</a>
+        </div>
+    </div>
+
+}
