@@ -14,7 +14,7 @@ namespace AmandaFE
         /// <summary>
         /// Tries to find a Keyword entity with text matching keywordText. If found, that Keyword
         /// entity is returned; otherwise, a new keyword will be created, added to the database,
-        /// and returned. Does not commit changes to the database (call context.SaveChanges{Async}() when ready)
+        /// and returned.
         /// </summary>
         /// <param name="keywordText">The keyword text to find or to place into a new Keyword entity</param>
         /// <param name="context">The database context to operate on</param>
@@ -48,11 +48,13 @@ namespace AmandaFE
         /// If the relation does not currently exist, a new relational table entity is generated,
         /// added to the database, and returned; otherwise, that relational table entity is simply returned
         /// to the caller. Does not commit changes to the database (call context.SaveChanges{Async} when ready)
+        /// Returns null if the specified keyword or post does not exist on the database.
         /// </summary>
         /// <param name="keywordId">The primary key for the keyword</param>
         /// <param name="postId">The primary key for the post</param>
-        /// <param name="context">The databsae context to operate on</param>
-        /// <returns>A new or existing PostKeyword relational entity</returns>
+        /// <param name="context">The database context to operate on</param>
+        /// <returns>A new or existing PostKeyword relational entity (null if either Id does not exist
+        /// on the database</returns>
         public static async Task<PostKeyword> GetOrCreatePostKeywordAsync(int keywordId, int postId, BlogDBContext context)
         {
             if (context is null)
@@ -67,20 +69,17 @@ namespace AmandaFE
             // If the relationship does not exist yet, then generate it
             if (postKeyword is null)
             {
+                if (await context.Post.FindAsync(postId) is null ||
+                    await context.Keyword.FindAsync(keywordId) is null)
+                {
+                    return null;
+                }
+
                 postKeyword = new PostKeyword()
                 {
                     // TODO(taylorjoshuaw): Add check to make sure these id's exist
                     KeywordId = keywordId,
                     PostId = postId
-                    /* This way doesn't work.... :(
-                    Keyword = await context.Keyword.Include(k => k.PostKeywords)
-                                                   .FirstOrDefaultAsync(k => k.Id == keywordId) ??
-                                                   throw new KeyNotFoundException("Provided keywordId could not be found in the database"),
-
-                    Post = await context.Post.Include(p => p.PostKeywords)
-                                             .FirstOrDefaultAsync(p => p.Id == postId) ??
-                                             throw new KeyNotFoundException("Provided postId could not be found in the database")
-                    */
                 };
 
                 await context.AddAsync(postKeyword);
