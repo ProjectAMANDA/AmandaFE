@@ -36,10 +36,13 @@
                     <a asp-controller="Home" asp-action="Index" class="nav-link lead px-2 @(ViewBag.Title.StartsWith("Home") ? "active" : "")">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a asp-controller="Blog" asp-action="Index" class="nav-link lead px-2 @(ViewBag.Title.StartsWith("Blog") ? "active" : "")">Blogs</a>
+                    <a asp-controller="Blog" asp-action="Index" class="nav-link lead px-2 @(ViewBag.Title.StartsWith("Blog - Viewing") ? "active" : "")">Blogs</a>
                 </li>
                 <li class="nav-item">
-                    <a asp-controller="User" asp-action="Index" class="nav-link lead px-2 @(ViewBag.Title.StartsWith("User") ? "active" : "")">Users</a>
+                    <a asp-controller="User" asp-action="Details" class="nav-link lead px-2 @(ViewBag.Title.StartsWith("User") ? "active" : "")">My Posts</a>
+                </li>
+                <li class="nav-item ml-5">
+                    <a asp-controller="Blog" asp-action="Create" class="nav-link lead px-2 @(ViewBag.Title.StartsWith("Blog - Create") ? "active" : "")">Write New Post</a>
                 </li>
             </ul>
 
