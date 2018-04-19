@@ -24,6 +24,9 @@ namespace AmandaFE.Data
                 .WithOne(p => p.User)
                 .IsRequired(true)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PostKeyword>()
+                .HasKey(k => new { k.PostId, k.KeywordId });
         }
     }
 }

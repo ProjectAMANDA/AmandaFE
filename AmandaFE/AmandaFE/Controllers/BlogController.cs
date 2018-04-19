@@ -203,7 +203,7 @@ namespace AmandaFE.Controllers
             if (!String.IsNullOrEmpty(search))
             {
                 // Search for a match under either Title or Keywords
-                posts = posts.Where(s => (s.Title.Contains(search) || s.Keywords.Contains(search)));
+                //posts = posts.Where(s => (s.Title.Contains(search) || s.Keyword.Contains(search)));
 
             }
 
@@ -236,27 +236,34 @@ namespace AmandaFE.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            Post existingPost = await _context.Post.FirstOrDefaultAsync(p => p.Id == id);
+
+            if (ModelState.IsValid && existingPost != null)
             {
                 try
                 {
-                    _context.Update(post);
+                    // Update the fields in the existing post based on the relevant
+                    // edited columns and update the date (might need a "ModifiedDate" in the future)
+                    existingPost.Title = post.Title;
+                    existingPost.Content = post.Content;
+                    existingPost.CreationDate = DateTime.Now;
+
+                    // TODO(taylorjoshuaw): Add tags here
+
+                    _context.Update(existingPost);
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
+                catch
                 {
-                    if (!PostExists(post.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    TempData["NotificationType"] = "alert-danger";
+                    TempData["NotificationMessage"] = "Unable to commit changes to backend database. Please try again.";
+                    return View(existingPost);
                 }
-                return RedirectToAction(nameof(Index));
+
+                return RedirectToAction("Details", new { id });
             }
-            return View(post);
+
+            return View(existingPost);
         }
 
         public async Task<IActionResult> Delete(int? id)
