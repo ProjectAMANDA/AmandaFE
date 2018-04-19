@@ -160,9 +160,9 @@ namespace AmandaFE.Controllers
                 return RedirectToAction("Index");
             }
 
-            IEnumerable<string> imageHrefs = await BackendAPI.GetImageHrefs(post.Content);
+            JObject apiResponse = await BackendAPI.GetAnalyticsAsync(post.Content);
 
-            if (imageHrefs is null || imageHrefs.Count() < 1)
+            if (apiResponse is null)
             {
                 TempData["NotificationType"] = "alert-danger";
                 TempData["NotificationMessage"] = "Could not reach remote enrichment services, but successfully created blog post. Please try enrichment services later.";
@@ -173,7 +173,8 @@ namespace AmandaFE.Controllers
             {
                 Post = post,
                 PostId = post.Id,
-                ImageHrefs = imageHrefs
+                Images = apiResponse["images"].ToArray(),
+                Sentiment = apiResponse["sentiment"].Value<float>()
             };
 
             return View(vm);
@@ -207,11 +208,8 @@ namespace AmandaFE.Controllers
             catch
             {
                 TempData["NotificationType"] = "alert-danger";
-                TempData["NotificationMessage"] = $"Could not commit post enrichment to backend database. Please try again.";
-                vm.ImageHrefs = await BackendAPI.GetImageHrefs(post.Content);
-                vm.Post = post;
-
-                return View(vm);
+                TempData["NotificationMessage"] = $"Could not commit post enrichment to backend database. Please try again later.";
+                return RedirectToAction("Details", new { id = vm.PostId });
             }
 
             TempData["NotificationType"] = "alert-success";

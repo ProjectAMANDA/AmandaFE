@@ -9,23 +9,22 @@ namespace AmandaFE
 {
     public static class BackendAPI
     {
-        public static async Task<IEnumerable<string>> GetImageHrefs(string text)
+        public static async Task<JObject> GetAnalyticsAsync(string text)
         {
             using (HttpClient client = new HttpClient())
             {
                 client.BaseAddress = new Uri("http://localhost:50063/api/");
                 client.DefaultRequestHeaders.Add("text", text);
 
-                HttpResponseMessage response = await client.GetAsync("image");
+                HttpResponseMessage response = await client.GetAsync("analytics/true/2");
 
                 if (response.IsSuccessStatusCode)
                 {
-                    JArray apiArray = JArray.Parse(await response.Content.ReadAsStringAsync());
-                    return apiArray.ToObject<string[]>();
+                    return JObject.Parse(await response.Content.ReadAsStringAsync());
                 }
                 else
                 {
-                    return new string[0];
+                    return null;
                 }
             }
         }

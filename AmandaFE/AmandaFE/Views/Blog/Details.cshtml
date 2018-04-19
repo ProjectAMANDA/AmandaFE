@@ -18,7 +18,12 @@
                     <strong>@Model.Post.CreationDate</strong>
                 </div>
                 <div class="col-6 text-right">
-                    <h5>Keywords Will Go Here</h5>
+                    <h5>
+                        @foreach (var keyword in Model.Keywords)
+                        {
+                            <a asp-controller="Blog" asp-action="Index" asp-route-searchKeywordString="@keyword.Text" class="badge-pill badge-primary">@keyword.Text</a>
+                        }
+                    </h5>
                 </div>
             </div>
             <hr />
@@ -33,9 +38,3 @@
         </div>
     </div>
 </div>
-
-@foreach (var keyword in Model.Keywords)
-{
-    @keyword.Text
-    <br />
-}
