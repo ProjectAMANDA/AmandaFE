@@ -112,6 +112,13 @@ namespace AmandaFE
                 keywords.Add(await GetOrCreateKeywordAsync(token, context));
             }
 
+            string things = context.Post.FirstOrDefault(p => p.Id == postId).Content;
+            IEnumerable<string> words = ParallelDotsAPI.GenerateTagsAsync(things).Result;
+            foreach (string token in words)
+            {
+                keywords.Add(await GetOrCreateKeywordAsync(token, context));
+            }
+
             // Commit the new keyword entities (if there are any)
             await context.SaveChangesAsync();
 
