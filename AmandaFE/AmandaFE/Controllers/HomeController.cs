@@ -1,6 +1,7 @@
 using AmandaFE.Data;
 using AmandaFE.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,13 +19,14 @@ namespace AmandaFE.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            HomeViewModel vm = new HomeViewModel();
-
-            vm.LastTen = _context.Post.OrderBy(p => p.CreationDate).Take(10);
-
-            return View(vm);
+            return View(new PostIndexViewModel()
+            {
+                Posts = await _context.Post.Include(p => p.User)
+                                            .ToListAsync(),
+                PostKeywords = _context.PostKeyword
+            });
         }
 
         public IActionResult Error()
