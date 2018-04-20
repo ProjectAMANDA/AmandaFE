@@ -71,7 +71,7 @@ namespace FrontendTesting
             // Assert
             Assert.Equal(57, vm.PostId);
         }
-        /*
+
         [Fact]
         public void CanGetImageHrefsTest()
         {
@@ -84,6 +84,5 @@ namespace FrontendTesting
             // Assert
             Assert.Single(vm.ImageHrefs);
         }
-        */
     }
 }
