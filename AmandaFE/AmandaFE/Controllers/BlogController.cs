@@ -305,6 +305,8 @@ namespace AmandaFE.Controllers
                     existingPost.Title = post.Title;
                     existingPost.Content = post.Content;
                     existingPost.CreationDate = DateTime.Now;
+                    existingPost.Summary = post.Summary;
+                    existingPost.Sentiment = post.Sentiment;
 
                     // TODO(taylorjoshuaw): Add tags here
 
