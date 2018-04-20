@@ -83,10 +83,10 @@ namespace FrontendTesting
         //        // Act
         //        var result = await controller.Create();
         //        var temp = 10;
-        //        //DbSet<User> lists = result.Value as DbSet<User>;
+        //        DbSet<User> lists = result.Value as DbSet<User>;
 
         //        // Assert
-        //        //Assert.Equal(2, await lists.CountAsync());
+        //        Assert.Equal(2, await lists.CountAsync());
 
         //    }
         //}
@@ -99,10 +99,23 @@ namespace FrontendTesting
             DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
-            
+
             // Arrange
+            var context = new BlogDBContext(options);
+            //using (BlogDBContext context = new BlogDBContext(options))
+            {
+
+            }
+                BlogController controller = new BlogController(context);
 
 
+            // Act
+            var result = controller.Enrich(24);
+
+
+            // Asset
+            // Trivial test. Awaiting further instruction.
+            Assert.Equal(result, result);
         }
 
     }
