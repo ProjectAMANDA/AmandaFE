@@ -34,6 +34,8 @@
                     <div class="form-group mr-3">
                         <label for="EnrichPost" class="col-auto inline form-check-label"><abbr title="Enrich your post with images and related articles using Azure Cognitive Servives and the Related Articles API. Note: User agrees to the privacy terms and conditions of these services by using the enrichment feature.">Enrich Post</abbr></label>
                         <input asp-for="EnrichPost" class="form-control form-check-inline col-auto" />
+                        <label for="UseBing" class="col-auto inline form-check-label"><abbr title="Pulls images based on key words found in your post by Azure Cognitive Services">Use Bing Image Seach</abbr></label>
+                        <input asp-for="UseBing" class="form-control form-check-inline col-auto" />
                     </div>
                     <div class="form-group mr-3">
                         <a asp-action="Index" class="btn btn-danger">Cancel</a>

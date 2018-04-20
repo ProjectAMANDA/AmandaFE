@@ -79,7 +79,8 @@ namespace AmandaFE.Controllers
             PostCreateViewModel vm = new PostCreateViewModel()
             {
                 UserName = user?.Name,
-                EnrichPost = true
+                EnrichPost = true,
+                UseBing = true
             };
 
             return View(vm);
@@ -87,7 +88,7 @@ namespace AmandaFE.Controllers
 
         [HttpPost]
         public async Task<IActionResult> Create(
-            [Bind("UserName", "PostTitle", "PostContent", "EnrichPost", "Keywords")] PostCreateViewModel vm)
+            [Bind("UserName", "PostTitle", "PostContent", "EnrichPost", "UseBing", "Keywords")] PostCreateViewModel vm)
         {
             if (!ModelState.IsValid)
             {
@@ -133,18 +134,18 @@ namespace AmandaFE.Controllers
             await KeywordUtilities.MergeKeywordStringIntoPostAsync(vm.Keywords, post.Id, _context);
             await Cookies.WriteUserCookieByIdAsync(post.User.Id, Response, _context);
 
-            if (!vm.EnrichPost)
+            if (!vm.EnrichPost && !vm.UseBing)
             {
                 TempData["NotificationType"] = "alert-success";
                 TempData["NotificationMessage"] = $"Successfully posted {post.Title}!";
                 return RedirectToAction("Details", new { post.Id });
             }
 
-            return RedirectToAction("Enrich", new { post.Id });
+            return RedirectToAction("Enrich", new { vm.UseBing, post.Id });
         }
 
         [HttpGet]
-        public async Task<IActionResult> Enrich(int? id)
+        public async Task<IActionResult> Enrich(bool useBing, int? id)
         {
             if (!id.HasValue)
             {
@@ -160,7 +161,7 @@ namespace AmandaFE.Controllers
                 return RedirectToAction("Index");
             }
 
-            JObject apiResponse = await BackendAPI.GetAnalyticsAsync(post.Content);
+            JObject apiResponse = await BackendAPI.GetAnalyticsAsync(post.Content, useBing);
 
             if (apiResponse is null)
             {

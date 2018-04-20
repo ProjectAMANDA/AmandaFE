@@ -9,14 +9,14 @@ namespace AmandaFE
 {
     public static class BackendAPI
     {
-        public static async Task<JObject> GetAnalyticsAsync(string text)
+        public static async Task<JObject> GetAnalyticsAsync(string text, bool useBing)
         {
             using (HttpClient client = new HttpClient())
             {
                 client.BaseAddress = new Uri("http://localhost:50063/api/");
                 client.DefaultRequestHeaders.Add("text", text);
-
-                HttpResponseMessage response = await client.GetAsync("analytics/true/2");
+                string path = useBing ? "false/3" : "true/2";
+                HttpResponseMessage response = await client.GetAsync($"analytics/{path}");
 
                 if (response.IsSuccessStatusCode)
                 {
