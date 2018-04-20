@@ -113,7 +113,7 @@ namespace AmandaFE
             }
 
             string things = context.Post.FirstOrDefault(p => p.Id == postId).Content;
-            IEnumerable<string> words = ParallelDotsAPI.GenerateTagsAsync(things).Result;
+            IEnumerable<string> words = await ParallelDotsAPI.GenerateTagsAsync(things);
             foreach (string token in words)
             {
                 keywords.Add(await GetOrCreateKeywordAsync(token, context));

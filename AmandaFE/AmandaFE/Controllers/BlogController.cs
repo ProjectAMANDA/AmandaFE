@@ -91,8 +91,10 @@ namespace AmandaFE.Controllers
         {
             if (!ModelState.IsValid)
             {
+                /*
                 TempData["NotificationType"] = "alert-warning";
                 TempData["NotificationMessage"] = "One or more of the blog fields were entered incorrectly. Please try again.";
+                */
                 return View(vm);
             }
 
@@ -125,8 +127,10 @@ namespace AmandaFE.Controllers
             }
             catch
             {
+                /*
                 TempData["NotificationType"] = "alert-danger";
                 TempData["NotificationMessage"] = "Unable to commit new post to backend database. Please try again.";
+                */
                 return View(vm);
             }
 
@@ -135,8 +139,10 @@ namespace AmandaFE.Controllers
 
             if (!vm.EnrichPost)
             {
+                /*
                 TempData["NotificationType"] = "alert-success";
                 TempData["NotificationMessage"] = $"Successfully posted {post.Title}!";
+                */
                 return RedirectToAction("Details", new { post.Id });
             }
 
@@ -155,8 +161,10 @@ namespace AmandaFE.Controllers
 
             if (post is null)
             {
+                /*
                 TempData["NotificationType"] = "alert-warning";
                 TempData["NotificationMessage"] = "Could not find the specified blog post.";
+                */
                 return RedirectToAction("Index");
             }
 
@@ -164,8 +172,10 @@ namespace AmandaFE.Controllers
 
             if (apiResponse is null)
             {
+                /*
                 TempData["NotificationType"] = "alert-danger";
                 TempData["NotificationMessage"] = "Could not reach remote enrichment services, but successfully created blog post. Please try enrichment services later.";
+                */
                 return RedirectToAction("Details", new { post.Id });
             }
 
@@ -237,8 +247,10 @@ namespace AmandaFE.Controllers
 
             if (post is null)
             {
+                /*
                 TempData["NotificationType"] = "alert-warning";
                 TempData["NotificationMessage"] = "Could not find the specified blog post.";
+                */
                 return RedirectToAction("Index");
             }
 
@@ -322,8 +334,10 @@ namespace AmandaFE.Controllers
                 }
                 catch
                 {
+                    /*
                     TempData["NotificationType"] = "alert-danger";
                     TempData["NotificationMessage"] = "Unable to commit changes to backend database. Please try again.";
+                    */
                     return View(existingPost);
                 }
 

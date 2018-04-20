@@ -13,7 +13,7 @@ namespace AmandaFE
         {
             using (HttpClient client = new HttpClient())
             {
-                client.BaseAddress = new Uri("http://localhost:50063/api/");
+                client.BaseAddress = new Uri("http://amandapi20180416113018.azurewebsites.net/api/");
                 client.DefaultRequestHeaders.Add("text", text);
 
                 HttpResponseMessage response = await client.GetAsync("analytics/true/2");
