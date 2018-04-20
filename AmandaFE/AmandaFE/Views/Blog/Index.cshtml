@@ -23,7 +23,7 @@
                 <div class="card-body py-3">
                     <a class="card-title h4" asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id">@post.Title</a>
                     <h6 class="card-subtitle mt-1">Posted by <a asp-controller="User" asp-action="Details" asp-route-id="@post.User.Id">@post.User.Name</a> on @post.CreationDate</h6>
-                    <br />
+                    <hr />
                     @post.Summary
                 </div>
                 <div class="card-footer">

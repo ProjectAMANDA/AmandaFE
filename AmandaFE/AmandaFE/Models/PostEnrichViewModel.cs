@@ -15,5 +15,6 @@ namespace AmandaFE.Models
         public string SelectedImageHref { get; set; }
 
         public float Sentiment { get; set; }
+        public string SignificantPhrase { get; set; } = "";
     }
 }

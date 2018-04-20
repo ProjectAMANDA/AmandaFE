@@ -4,7 +4,7 @@
     ViewBag.Title = $"Blog - Read Post: {Model.Post.Title}";
 }
 
-<div class="offset-lg-2 col-lg-8">
+<div class="offset-xl-3 col-xl-6 offset-lg-2 col-lg-8 offset-md-1 col-md-10 offset-sm-0 col-sm-12">
     <div class="card">
         <div class="card-body pb-0">
             <div class="row justify-content-center">
@@ -18,19 +18,18 @@
                     <strong>@Model.Post.CreationDate</strong>
                 </div>
                 <div class="col-6 text-right">
-                    <h5>
                         @foreach (var keyword in Model.Keywords)
                         {
                             <a asp-controller="Blog" asp-action="Index" asp-route-searchKeywordString="@keyword.Text" class="badge-pill badge-primary">@keyword.Text</a>
                         }
-                    </h5>
                 </div>
             </div>
             <hr />
             <p>@Model.Post.Content</p>
             <img src="@Model.Post.ImageHref" class="card-img-bottom" />
-            <div class="form-group form-inline row justify-content-end">
-                <div class="form-group mr-3">
+            <div class="form-group form-inline justify-content-end">
+                <div class="btn-group mt-3">
+                    <a asp-action="Enrich" asp-route-id="@Model.Post.Id" class="btn btn-primary">Enrich Post</a>
                     <a asp-action="Edit" asp-route-id="@Model.Post.Id" class="btn btn-warning">Edit Post</a>
                     <a asp-action="Delete" asp-route-id="@Model.Post.Id" class="btn btn-danger">Delete Post</a>
                 </div>
