@@ -84,35 +84,5 @@ namespace FrontendTesting
             // Assert
             Assert.Single(vm.ImageHrefs);
         }
-        [Fact]
-        public void GetSelectedImageHref()
-        {
-            // Arrange
-            PostEnrichViewModel vm = new PostEnrichViewModel
-            {
-                SelectedImageHref = "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
-            };
-
-            // Assert
-            Assert.Equal("https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png", vm.SelectedImageHref);
-        }
-
-        [Fact]
-        public void SetSelectedImageHref()
-        {
-            // Arrange
-            PostEnrichViewModel vm = new PostEnrichViewModel
-            {
-                SelectedImageHref = "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
-            };
-
-            // Act
-            vm.SelectedImageHref = "https://img-prod-cms-rt-microsoft-com.akamaized.net/cms/api/am/imageFileData/RE1Mu3b?ver=5c31";
-
-            // Assert
-            Assert.Equal("https://img-prod-cms-rt-microsoft-com.akamaized.net/cms/api/am/imageFileData/RE1Mu3b?ver=5c31", vm.SelectedImageHref);
-        }
-
-
     }
 }
