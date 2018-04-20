@@ -1,18 +1,38 @@
-﻿@model HomeViewModel
+﻿@model PostIndexViewModel
 @{
     ViewBag.Title = "Home - Latest Activity";
 }
 
-@foreach (var post in Model.LastTen)
-{
-    <div class="jumbotron">
-        <h1 class="display-3">@post.Title</h1>
-        <p class="lead">@post.User - @post.CreationDate</p>
-        <hr class="my-4">
-        <p>@post.Summary</p>
-        <p class="lead">
-            <a class="btn btn-primary btn-lg" asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id" role="button">Learn more</a>
-        </p>
-    </div>
+<h2>Welcome to Project A.M.A.N.D.A.</h2>
 
-}
+<p>Ready to get started blogging? Click on the Write New Post button above!</p>
+<p>If you just want to explore for awhile, check out some of the most recent blogs below. Just click Read More.</p>
+<hr width="75%" />
+
+<div class="row">
+    @foreach (var post in Model.Posts)
+    {
+        <div class="mb-3 col-lg-5 col-sm-10 mx-auto">
+            <div class="card">
+                <div class="card-body py-3">
+                    <a class="card-title h4" asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id">@post.Title</a>
+                    <h6 class="card-subtitle mt-1">Posted by <a asp-controller="User" asp-action="Details" asp-route-id="@post.User.Name">@post.User.Name</a> on @post.CreationDate</h6>
+                    <br />
+                    @post.Summary
+                    <br />
+                    <br />
+                    <a class="btn btn-primary btn-sm" asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id" role="button">Read More</a>
+                </div>
+                <div class="card-footer">
+                    @foreach (var keyword in Model.PostKeywords.Include(pk => pk.Keyword)
+                                                           .Where(pk => pk.PostId == post.Id)
+                                                           .Select(pk => pk.Keyword)
+                                                           .ToList())
+                    {
+                        <a class="badge-pill badge-primary" asp-controller="Blog" asp-action="Index" asp-route-searchKeywordString="@keyword.Text">@keyword.Text</a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
