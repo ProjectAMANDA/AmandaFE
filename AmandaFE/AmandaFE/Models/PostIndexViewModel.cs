@@ -14,7 +14,7 @@ namespace AmandaFE.Models
         public string SearchKeywordString { get; set; }
 
         public ICollection<Post> Posts { get; set; }
-
+        public IEnumerable<Post> LastTen { get; set; }
         public DbSet<PostKeyword> PostKeywords { get; set; }
     }
 }
