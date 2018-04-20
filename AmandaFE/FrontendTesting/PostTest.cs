@@ -44,11 +44,11 @@ namespace FrontendTesting
             // Arrange
             Post post = new Post()
             {
-                UserId = 42
+                Id = 42
             };
 
             // Assert
-            Assert.Equal(42, post.UserId);
+            Assert.Equal(42, post.Id);
         }
 
         [Fact]
@@ -57,14 +57,14 @@ namespace FrontendTesting
             // Arrange
             Post post = new Post()
             {
-                UserId = 42
+                Id = 42
             };
 
             // Act
-            post.UserId = 57;
+            post.Id = 57;
 
             // Assert
-            Assert.Equal(57, post.UserId);
+            Assert.Equal(57, post.Id);
         }
 
         [Fact]
