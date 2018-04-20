@@ -181,6 +181,7 @@ namespace AmandaFE.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Enrich(
             [Bind("PostId", "SelectedImageHref")] PostEnrichViewModel vm)
         {
@@ -193,8 +194,10 @@ namespace AmandaFE.Controllers
 
             if (post is null)
             {
+                /* TempData crashes CLR on Azure *shrug*
                 TempData["NotificationType"] = "alert-danger";
                 TempData["NotificationMessage"] = "Could not find the specified post to enrich. Please try again.";
+                */
                 return RedirectToAction("Enrich", new { vm.PostId });
             }
 
@@ -207,13 +210,17 @@ namespace AmandaFE.Controllers
             }
             catch
             {
+                /* TempData crashes CLR on Azure *shrug*
                 TempData["NotificationType"] = "alert-danger";
                 TempData["NotificationMessage"] = $"Could not commit post enrichment to backend database. Please try again later.";
+                */
                 return RedirectToAction("Details", new { id = vm.PostId });
             }
 
+            /* TempData crashes CLR on Azure *shrug*
             TempData["NotificationType"] = "alert-success";
             TempData["NotificationMessage"] = $"Successfully enriched {post.Title}";
+            */
             return RedirectToAction("Details", new { id = vm.PostId });
         }
 
