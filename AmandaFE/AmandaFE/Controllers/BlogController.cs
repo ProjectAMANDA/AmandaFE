@@ -91,8 +91,10 @@ namespace AmandaFE.Controllers
         {
             if (!ModelState.IsValid)
             {
+                /*
                 TempData["NotificationType"] = "alert-warning";
                 TempData["NotificationMessage"] = "One or more of the blog fields were entered incorrectly. Please try again.";
+                */
                 return View(vm);
             }
 
@@ -111,7 +113,7 @@ namespace AmandaFE.Controllers
             Post post = new Post()
             {
                 Content = vm.PostContent,
-                Summary = vm.PostContent.Substring(0, Math.Min(vm.PostContent.Length, 100)),
+                Summary = vm.PostContent.Substring(0, Math.Min(vm.PostContent.Length, 250)),
                 CreationDate = DateTime.Now,
                 Title = vm.PostTitle,
                 User = user
@@ -125,8 +127,10 @@ namespace AmandaFE.Controllers
             }
             catch
             {
+                /*
                 TempData["NotificationType"] = "alert-danger";
                 TempData["NotificationMessage"] = "Unable to commit new post to backend database. Please try again.";
+                */
                 return View(vm);
             }
 
@@ -135,8 +139,10 @@ namespace AmandaFE.Controllers
 
             if (!vm.EnrichPost)
             {
+                /*
                 TempData["NotificationType"] = "alert-success";
                 TempData["NotificationMessage"] = $"Successfully posted {post.Title}!";
+                */
                 return RedirectToAction("Details", new { post.Id });
             }
 
@@ -155,32 +161,49 @@ namespace AmandaFE.Controllers
 
             if (post is null)
             {
+                /*
                 TempData["NotificationType"] = "alert-warning";
                 TempData["NotificationMessage"] = "Could not find the specified blog post.";
+                */
                 return RedirectToAction("Index");
             }
+
+            PostKeyword postKeyword = await _context.PostKeyword.Include(pk => pk.Keyword)
+                                                                .FirstOrDefaultAsync(pk => pk.PostId == post.Id);
 
             JObject apiResponse = await BackendAPI.GetAnalyticsAsync(post.Content);
 
             if (apiResponse is null)
             {
+                /*
                 TempData["NotificationType"] = "alert-danger";
                 TempData["NotificationMessage"] = "Could not reach remote enrichment services, but successfully created blog post. Please try enrichment services later.";
+                */
                 return RedirectToAction("Details", new { post.Id });
+            }
+            
+            List<JToken> images = apiResponse["images"].ToList();
+
+            if (postKeyword != null)
+            {
+                JObject bingResponse = await BackendAPI.GetBingAsync(postKeyword.Keyword.Text);
+                images.AddRange(bingResponse["images"]);
             }
 
             PostEnrichViewModel vm = new PostEnrichViewModel()
             {
                 Post = post,
                 PostId = post.Id,
-                Images = apiResponse["images"].ToArray(),
-                Sentiment = apiResponse["sentiment"].Value<float>()
+                Images = images.ToArray(),
+                Sentiment = apiResponse["sentiment"].Value<float>(),
+                SignificantPhrase = postKeyword.Keyword.Text
             };
 
             return View(vm);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Enrich(
             [Bind("PostId", "SelectedImageHref")] PostEnrichViewModel vm)
         {
@@ -193,8 +216,10 @@ namespace AmandaFE.Controllers
 
             if (post is null)
             {
+                /* TempData crashes CLR on Azure *shrug*
                 TempData["NotificationType"] = "alert-danger";
                 TempData["NotificationMessage"] = "Could not find the specified post to enrich. Please try again.";
+                */
                 return RedirectToAction("Enrich", new { vm.PostId });
             }
 
@@ -207,13 +232,17 @@ namespace AmandaFE.Controllers
             }
             catch
             {
+                /* TempData crashes CLR on Azure *shrug*
                 TempData["NotificationType"] = "alert-danger";
                 TempData["NotificationMessage"] = $"Could not commit post enrichment to backend database. Please try again later.";
+                */
                 return RedirectToAction("Details", new { id = vm.PostId });
             }
 
+            /* TempData crashes CLR on Azure *shrug*
             TempData["NotificationType"] = "alert-success";
             TempData["NotificationMessage"] = $"Successfully enriched {post.Title}";
+            */
             return RedirectToAction("Details", new { id = vm.PostId });
         }
 
@@ -230,8 +259,10 @@ namespace AmandaFE.Controllers
 
             if (post is null)
             {
+                /*
                 TempData["NotificationType"] = "alert-warning";
                 TempData["NotificationMessage"] = "Could not find the specified blog post.";
+                */
                 return RedirectToAction("Index");
             }
 
@@ -305,7 +336,7 @@ namespace AmandaFE.Controllers
                     existingPost.Title = post.Title;
                     existingPost.Content = post.Content;
                     existingPost.CreationDate = DateTime.Now;
-                    existingPost.Summary = post.Summary;
+                    existingPost.Summary = post.Content.Substring(0, Math.Min(post.Content.Length, 250));
                     existingPost.Sentiment = post.Sentiment;
 
                     // TODO(taylorjoshuaw): Add tags here
@@ -315,8 +346,10 @@ namespace AmandaFE.Controllers
                 }
                 catch
                 {
+                    /*
                     TempData["NotificationType"] = "alert-danger";
                     TempData["NotificationMessage"] = "Unable to commit changes to backend database. Please try again.";
+                    */
                     return View(existingPost);
                 }
 

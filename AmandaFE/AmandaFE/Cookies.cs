@@ -41,6 +41,13 @@ namespace AmandaFE
             }
         }
 
+        /// <summary>
+        /// Writes out the user's id to the user's browser as a cookie
+        /// </summary>
+        /// <param name="userId">The user's user id</param>
+        /// <param name="response">The HttpResponse object for the calling action</param>
+        /// <param name="context">The database context to operate on</param>
+        /// <returns>An empty async Task</returns>
         public static async Task WriteUserCookieByIdAsync(int userId, HttpResponse response, BlogDBContext context)
         {
             if (response is null || context is null)
@@ -56,6 +63,13 @@ namespace AmandaFE
             }
         }
 
+        /// <summary>
+        /// Writes out the user's id to the user's browser as a cookie
+        /// </summary>
+        /// <param name="userName">The user's username</param>
+        /// <param name="response">The HttpResponse object for the calling action</param>
+        /// <param name="context">The database context to operate on</param>
+        /// <returns>An empty async Task</returns>
         public static async Task WriteUserCookieByNameAsync(string userName, HttpResponse response, BlogDBContext context)
         {
             if (string.IsNullOrWhiteSpace(userName) || response is null || context is null)

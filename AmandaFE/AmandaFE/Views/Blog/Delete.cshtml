@@ -2,19 +2,31 @@
 @{
     ViewBag.Title = $"Delete Post - {Model.Title}";
 }
-<h3>Post Details</h3>
-<hr />
-<dl class="d-lg-table">
-    <dt>@Html.DisplayNameFor(model => model.Title)</dt>
-    <dd>@Html.DisplayFor(model => model.Title)</dd>
-    <dt>@Html.DisplayNameFor(model => model.Content)</dt>
-    <dd>@Html.DisplayFor(model => model.Content)</dd>
-</dl>
+<div class="offset-2 col-8">
 
-<form asp-action="Delete">
-    <input type="hidden" asp-for="Id" />
-    <input type="hidden" asp-for="User" />
-    <input type="hidden" asp-for="UserId" />
-    <a asp-action="Index" class="btn btn-danger">Cancel</a>
-    <button type="submit" value="Delete" class="btn btn-success ml-2">Delete</button>
-</form>
+    <div class="card">
+
+        <div class="card-body">
+            <h3>Are you sure you would like delete this post?</h3>
+            <hr />
+            <dl class="d-lg-table">
+                <dt>Post Title</dt>
+                <dd>@Html.DisplayFor(model => model.Title)</dd>
+                <dt>Post Content</dt>
+                <dd>@Html.DisplayFor(model => model.Content)</dd>
+            </dl>
+
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="User" />
+                <input type="hidden" asp-for="UserId" />
+                <div class="btn-group float-right">
+                    <a asp-action="Index" class="btn btn-warning">Cancel</a>
+                    <button type="submit" value="Delete" class="btn btn-danger">Delete</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+</div>
