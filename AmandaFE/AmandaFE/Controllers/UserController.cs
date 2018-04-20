@@ -20,9 +20,22 @@ namespace AmandaFE.Controllers
         }
 
         // TODO(taylorjoshuaw): Change userName to Id from user table
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return RedirectToAction("Details");
+            UserViewModel vm = new UserViewModel();
+            try
+            {
+                vm.User = await Cookies.GetUserFromCookieAsync(Request, _context);
+
+                vm.AllPosts = vm.User.Posts;
+                return View(vm);
+            }
+            catch
+            {
+                return View();
+            }
+            
+
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -45,10 +58,13 @@ namespace AmandaFE.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
+            // TODO(taylorjoshuaw): Flesh out the user details view more. Temporarily just search on user
+            return RedirectToAction("Index", "Blog", new { searchUserName = vm.User.Name });
+            /*
             vm.LastFive = vm.User.Posts.TakeLast(5);
 
             return View(vm);
-
+            */
         }
 
         public IActionResult Create()

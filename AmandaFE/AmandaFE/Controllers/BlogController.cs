@@ -8,6 +8,7 @@ using AmandaFE.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
 
 namespace AmandaFE.Controllers
 {
@@ -20,11 +21,54 @@ namespace AmandaFE.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string searchKeywordString,
+            string searchUserName, int? page)
         {
-            // TODO(taylorjoshuaw): Don't just redirect to home!
-            //return View(_context.Post);
-            return RedirectToAction("Index", "Home");
+            if (string.IsNullOrWhiteSpace(searchKeywordString) &&
+                string.IsNullOrWhiteSpace(searchUserName))
+            {
+                return View(new PostIndexViewModel()
+                {
+                    Posts = await _context.Post.Include(p => p.User)
+                                               .ToListAsync(),
+                    PostKeywords = _context.PostKeyword
+                });
+            }
+
+            PostIndexViewModel vm = new PostIndexViewModel()
+            {
+                SearchKeywordString = searchKeywordString,
+                SearchUserName = searchUserName,
+                Posts = new List<Post>(),
+                PostKeywords = _context.PostKeyword
+            };
+
+            if (!string.IsNullOrWhiteSpace(searchKeywordString))
+            {
+                vm.Posts = await KeywordUtilities.GetPostsByKeywordStringAsync(
+                    searchKeywordString, _context);
+            }
+            if (!string.IsNullOrWhiteSpace(searchUserName))
+            {
+                if (vm.Posts.Any())
+                {
+                    vm.Posts = await vm.Posts.AsParallel()
+                                             .Where(p => p.User.Name.Contains(searchUserName))
+                                             .ToAsyncEnumerable()
+                                             .ToList();
+                }
+                else
+                {
+                    vm.Posts = await _context.Post.Include(p => p.User)
+                                                  .Include(p => p.PostKeywords)
+                                                  .Where(p => p.User.Name.Contains(searchUserName))
+                                                  .ToListAsync();
+                }
+            }
+
+            // TODO(taylorjoshuaw): Add searching by username
+
+            return View(vm);
         }
 
         [HttpGet]
@@ -43,7 +87,7 @@ namespace AmandaFE.Controllers
 
         [HttpPost]
         public async Task<IActionResult> Create(
-            [Bind("UserName", "PostTitle", "PostContent", "EnrichPost")] PostCreateViewModel vm)
+            [Bind("UserName", "PostTitle", "PostContent", "EnrichPost", "Keywords")] PostCreateViewModel vm)
         {
             if (!ModelState.IsValid)
             {
@@ -73,7 +117,6 @@ namespace AmandaFE.Controllers
                 User = user
             };
 
-
             await _context.Post.AddAsync(post);
 
             try
@@ -87,6 +130,7 @@ namespace AmandaFE.Controllers
                 return View(vm);
             }
 
+            await KeywordUtilities.MergeKeywordStringIntoPostAsync(vm.Keywords, post.Id, _context);
             await Cookies.WriteUserCookieByIdAsync(post.User.Id, Response, _context);
 
             if (!vm.EnrichPost)
@@ -116,9 +160,9 @@ namespace AmandaFE.Controllers
                 return RedirectToAction("Index");
             }
 
-            IEnumerable<string> imageHrefs = await BackendAPI.GetImageHrefs(post.Content);
+            JObject apiResponse = await BackendAPI.GetAnalyticsAsync(post.Content);
 
-            if (imageHrefs is null || imageHrefs.Count() < 1)
+            if (apiResponse is null)
             {
                 TempData["NotificationType"] = "alert-danger";
                 TempData["NotificationMessage"] = "Could not reach remote enrichment services, but successfully created blog post. Please try enrichment services later.";
@@ -129,7 +173,8 @@ namespace AmandaFE.Controllers
             {
                 Post = post,
                 PostId = post.Id,
-                ImageHrefs = imageHrefs
+                Images = apiResponse["images"].ToArray(),
+                Sentiment = apiResponse["sentiment"].Value<float>()
             };
 
             return View(vm);
@@ -163,11 +208,8 @@ namespace AmandaFE.Controllers
             catch
             {
                 TempData["NotificationType"] = "alert-danger";
-                TempData["NotificationMessage"] = $"Could not commit post enrichment to backend database. Please try again.";
-                vm.ImageHrefs = await BackendAPI.GetImageHrefs(post.Content);
-                vm.Post = post;
-
-                return View(vm);
+                TempData["NotificationMessage"] = $"Could not commit post enrichment to backend database. Please try again later.";
+                return RedirectToAction("Details", new { id = vm.PostId });
             }
 
             TempData["NotificationType"] = "alert-success";
@@ -183,6 +225,7 @@ namespace AmandaFE.Controllers
             }
 
             Post post = await _context.Post.Include(p => p.User)
+                                           .Include(p => p.PostKeywords)
                                            .FirstOrDefaultAsync(p => p.Id == id.Value);
 
             if (post is null)
@@ -192,7 +235,22 @@ namespace AmandaFE.Controllers
                 return RedirectToAction("Index");
             }
 
-            return View(post);
+            PostDetailViewModel vm = new PostDetailViewModel()
+            {
+                Post = post,
+                Keywords = await _context.PostKeyword.Include(pk => pk.Keyword)
+                                                     .Where(pk => pk.PostId == post.Id)
+                                                     .Select(pk => pk.Keyword)
+                                                     .ToListAsync()
+
+                /* This is how it will be done in the Edit action
+                KeywordString = string.Join(", ", _context.PostKeyword.Include(pk => pk.Keyword)
+                                                                      .Select(pk => pk.Keyword)
+                                                                      .ToList())
+                */
+            };
+
+            return View(vm);
         }
 
         public async Task<IActionResult> Find(string search)
@@ -203,7 +261,7 @@ namespace AmandaFE.Controllers
             if (!String.IsNullOrEmpty(search))
             {
                 // Search for a match under either Title or Keywords
-                posts = posts.Where(s => (s.Title.Contains(search) || s.Keywords.Contains(search)));
+                //posts = posts.Where(s => (s.Title.Contains(search) || s.Keyword.Contains(search)));
 
             }
 
@@ -219,7 +277,7 @@ namespace AmandaFE.Controllers
 
             var post = await _context.Post.SingleOrDefaultAsync(p => p.Id == id);
 
-            if( post == null)
+            if (post == null)
             {
                 return NotFound();
             }
@@ -236,27 +294,34 @@ namespace AmandaFE.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            Post existingPost = await _context.Post.FirstOrDefaultAsync(p => p.Id == id);
+
+            if (ModelState.IsValid && existingPost != null)
             {
                 try
                 {
-                    _context.Update(post);
+                    // Update the fields in the existing post based on the relevant
+                    // edited columns and update the date (might need a "ModifiedDate" in the future)
+                    existingPost.Title = post.Title;
+                    existingPost.Content = post.Content;
+                    existingPost.CreationDate = DateTime.Now;
+
+                    // TODO(taylorjoshuaw): Add tags here
+
+                    _context.Update(existingPost);
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
+                catch
                 {
-                    if (!PostExists(post.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    TempData["NotificationType"] = "alert-danger";
+                    TempData["NotificationMessage"] = "Unable to commit changes to backend database. Please try again.";
+                    return View(existingPost);
                 }
-                return RedirectToAction(nameof(Index));
+
+                return RedirectToAction("Details", new { id });
             }
-            return View(post);
+
+            return View(existingPost);
         }
 
         public async Task<IActionResult> Delete(int? id)

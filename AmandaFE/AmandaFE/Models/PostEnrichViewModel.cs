@@ -11,7 +11,9 @@ namespace AmandaFE.Models
         public Post Post { get; set; }
         public int PostId { get; set; }
 
-        public IEnumerable<string> ImageHrefs { get; set; }
+        public JToken[] Images { get; set; }
         public string SelectedImageHref { get; set; }
+
+        public float Sentiment { get; set; }
     }
 }

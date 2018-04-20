@@ -1,6 +1,9 @@
-﻿using System;
+﻿using AmandaFE.Data;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace AmandaFE.Models
@@ -12,8 +15,6 @@ namespace AmandaFE.Models
         public int UserId { get; set; }
         public User User { get; set; }
 
-        public ICollection<Post> RelatedPosts { get; set; }
-
         public string ImageHref { get; set; }
 
         public string Title { get; set; }
@@ -21,7 +22,8 @@ namespace AmandaFE.Models
         public string Content { get; set; }
         public string RelatedArticles { get; set; }
         public float Sentiment { get; set; }
-        public string Keywords { get; set; }
         public DateTime CreationDate { get; set; }
+
+        public ICollection<PostKeyword> PostKeywords { get; } = new List<PostKeyword>();
     }
 }

@@ -26,7 +26,10 @@ namespace AmandaFE.Models
         [Required]
         public string PostContent { get; set; }
 
-        [Display(Name ="Enrich Post", Description = "Enriches post using Azure Cognitive Services and Related Articles")]
+        [Display(Name = "Enrich Post", Description = "Enriches post using Azure Cognitive Services and Related Articles")]
         public bool EnrichPost { get; set; }
+
+        [Display(Name = "Blog Post Keywords (Comma Separated)")]
+        public string Keywords { get; set; }
     }
 }

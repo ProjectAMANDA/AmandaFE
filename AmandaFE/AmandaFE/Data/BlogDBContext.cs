@@ -9,8 +9,10 @@ namespace AmandaFE.Data
 {
     public class BlogDBContext : DbContext
     {
-        public DbSet<AmandaFE.Models.Post> Post { get; set; }
-        public DbSet<AmandaFE.Models.User> User { get; set; }
+        public DbSet<Post> Post { get; set; }
+        public DbSet<User> User { get; set; }
+        public DbSet<Keyword> Keyword { get; set; }
+        public DbSet<PostKeyword> PostKeyword { get; set; }
 
         public BlogDBContext(DbContextOptions<BlogDBContext> options) : base(options)
         {
@@ -24,6 +26,19 @@ namespace AmandaFE.Data
                 .WithOne(p => p.User)
                 .IsRequired(true)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PostKeyword>()
+                .HasKey(k => new { k.PostId, k.KeywordId });
+
+            modelBuilder.Entity<PostKeyword>()
+                .HasOne(pk => pk.Keyword)
+                .WithMany(k => k.PostKeywords)
+                .HasForeignKey(pk => pk.KeywordId);
+
+            modelBuilder.Entity<PostKeyword>()
+                .HasOne(pk => pk.Post)
+                .WithMany(p => p.PostKeywords)
+                .HasForeignKey(pk => pk.PostId);
         }
     }
 }
