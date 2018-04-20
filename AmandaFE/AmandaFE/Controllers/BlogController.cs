@@ -113,7 +113,7 @@ namespace AmandaFE.Controllers
             Post post = new Post()
             {
                 Content = vm.PostContent,
-                Summary = vm.PostContent.Substring(0, Math.Min(vm.PostContent.Length, 100)),
+                Summary = vm.PostContent.Substring(0, Math.Min(vm.PostContent.Length, 250)),
                 CreationDate = DateTime.Now,
                 Title = vm.PostTitle,
                 User = user
@@ -324,7 +324,7 @@ namespace AmandaFE.Controllers
                     existingPost.Title = post.Title;
                     existingPost.Content = post.Content;
                     existingPost.CreationDate = DateTime.Now;
-                    existingPost.Summary = post.Summary;
+                    existingPost.Summary = post.Content.Substring(0, Math.Min(post.Content.Length, 250));
                     existingPost.Sentiment = post.Sentiment;
 
                     // TODO(taylorjoshuaw): Add tags here
