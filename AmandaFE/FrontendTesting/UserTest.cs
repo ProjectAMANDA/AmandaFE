@@ -38,6 +38,22 @@ namespace FrontendTesting
         }
 
         [Fact]
+        public void CanGetPostsTest()
+        {
+            // Arrange
+            User user = new User
+            {
+                Posts = new List<Post>
+                {
+                    new Post()
+                }
+            };
+
+            // Assert
+            Assert.Single(user.Posts);
+        }
+
+        [Fact]
         public void GetNameTest()
         {
             // Arrange
