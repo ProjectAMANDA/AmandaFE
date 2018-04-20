@@ -168,6 +168,9 @@ namespace AmandaFE.Controllers
                 return RedirectToAction("Index");
             }
 
+            PostKeyword postKeyword = await _context.PostKeyword.Include(pk => pk.Keyword)
+                                                                .FirstOrDefaultAsync(pk => pk.PostId == post.Id);
+
             JObject apiResponse = await BackendAPI.GetAnalyticsAsync(post.Content);
 
             if (apiResponse is null)
@@ -178,13 +181,22 @@ namespace AmandaFE.Controllers
                 */
                 return RedirectToAction("Details", new { post.Id });
             }
+            
+            List<JToken> images = apiResponse["images"].ToList();
+
+            if (postKeyword != null)
+            {
+                JObject bingResponse = await BackendAPI.GetBingAsync(postKeyword.Keyword.Text);
+                images.AddRange(bingResponse["images"]);
+            }
 
             PostEnrichViewModel vm = new PostEnrichViewModel()
             {
                 Post = post,
                 PostId = post.Id,
-                Images = apiResponse["images"].ToArray(),
-                Sentiment = apiResponse["sentiment"].Value<float>()
+                Images = images.ToArray(),
+                Sentiment = apiResponse["sentiment"].Value<float>(),
+                SignificantPhrase = postKeyword.Keyword.Text
             };
 
             return View(vm);

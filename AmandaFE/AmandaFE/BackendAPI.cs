@@ -37,5 +37,23 @@ namespace AmandaFE
                 }
             }
         }
+
+        public static async Task<JObject> GetBingAsync(string significantPhrase)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("http://amandapi20180416113018.azurewebsites.net/api/");
+                HttpResponseMessage response = await client.GetAsync($"image/{significantPhrase}/2");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return JObject.Parse(await response.Content.ReadAsStringAsync());
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
     }
 }
