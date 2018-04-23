@@ -75,7 +75,7 @@ $ dotnet run
 
 ## Data Flow (Frontend, Backend, REST API)
 
-/assets/Flowchart.png
+![Data Flow Diagram](/assets/Flowchart.png)
 
 ## Data Model
 
