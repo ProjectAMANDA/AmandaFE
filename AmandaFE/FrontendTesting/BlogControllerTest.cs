@@ -87,12 +87,6 @@ namespace FrontendTesting
         //        // Act
         //        var result = await controller.Create();
         //        var temp = 10;
-        //        DbSet<User> lists = result.Value as DbSet<User>;
-
-        //        // Assert
-        //        Assert.Equal(2, await lists.CountAsync());
-
-        //    }
         //}
 
         //[Fact]
@@ -199,7 +193,6 @@ namespace FrontendTesting
             DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
-
         }
 
     }
