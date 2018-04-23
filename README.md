@@ -2,7 +2,16 @@
 
 ## Web App
 
-
+The web application consists of a frontend written in Razor views, HTML, CSS,
+Bootstrap, Popper, and jQuery. An interface is provided to create new blog
+posts, view existing blog posts, edit existing blog posts, delete existing
+blog posts, and search by both keywords and usernames. All blog posts can be
+enriched using Azure Language Services (part of Microsoft's Cognitive Services
+suite), Bing Image API, and Parallel Dots (for automated tagging of posts via
+key phrases detected within the post's body). Image enrichments can be added
+based on the overall sentiment score (a range 0.0 - 1.0 related to the mood
+of the post) and key phrases / keywords detected in the posts. Optionally, users
+can choose to opt-out of these features for privacy or data collection concerns.
 
 ## Tools Used
 Microsoft Visual Studio Community Version 15.5.7
@@ -44,7 +53,35 @@ Once that is complete, run the program.
 $ dotnet run
 ```
 
-## Models
+## Usage
+
+### Overview of Recent Posts
+![Overview of Recent Posts](/assets/overview.png)
+
+### Creating a Post
+![Post Creation](/assets/create.png)
+
+### Enriching a Post
+![Enriching Post](/assets/enrich.png)
+
+### Viewing Post Details
+![Details of Post](/assets/details.png)
+
+### Searching by User
+![Searching by User](/assets/user.png)
+
+### Searching by User and Keyword
+![Searcing by User and Keyword](/assets/user_keyword.png)
+
+## Data Flow (Frontend, Backend, REST API)
+
+/assets/Flowchart.png
+
+## Data Model
+
+### Overall Project Schema
+
+![Database Schema](/assets/ERD.png)
 
 ### Blog
 
