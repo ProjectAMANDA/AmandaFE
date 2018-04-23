@@ -3,6 +3,12 @@
     ViewBag.Title = "Home - Latest Activity";
 }
 
+<h2>Welcome to Project A.M.A.N.D.A.</h2>
+
+<p>Ready to get started blogging? Click on the Write Post button above!</p>
+<p>If you just want to explore for awhile, check out some of the most recent blogs below. Just click Read More.</p>
+<hr width="80%" />
+
 <div class="row">
     @foreach (var post in Model.Posts)
     {
@@ -13,6 +19,9 @@
                     <h6 class="card-subtitle mt-1">Posted by <a asp-controller="User" asp-action="Details" asp-route-id="@post.User.Name">@post.User.Name</a> on @post.CreationDate</h6>
                     <hr />
                     @post.Summary
+                    <br />
+                    <br />
+                    <a class="btn btn-primary btn-sm" asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id" role="button">Read More</a>
                 </div>
                 <div class="card-footer">
                     @foreach (var keyword in Model.PostKeywords.Include(pk => pk.Keyword)
