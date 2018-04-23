@@ -3,7 +3,9 @@
 ## Web App
 
 The web application consists of a frontend written in Razor views, HTML, CSS,
-Bootstrap, Popper, and jQuery. An interface is provided to create new blog
+Bootstrap, Popper, and jQuery. The backend was written in C# using ASP.NET Core 2, Entity Framework Core, and the MVC framework.
+
+An interface is provided to create new blog
 posts, view existing blog posts, edit existing blog posts, delete existing
 blog posts, and search by both keywords and usernames. All blog posts can be
 enriched using Azure Language Services (part of Microsoft's Cognitive Services
@@ -14,17 +16,18 @@ of the post) and key phrases / keywords detected in the posts. Optionally, users
 can choose to opt-out of these features for privacy or data collection concerns.
 
 ## Tools Used
-Microsoft Visual Studio Community Version 15.5.7
+Microsoft Visual Studio Community 2017 (Version 15.5.7)
 
-C#
-
-ASP.Net Core
-
-xUnit
-
-Bootstrap
-
-Azure
+- C#
+- ASP.Net Core
+- Entity Framework
+- MVC
+- xUnit
+- Bootstrap
+- Azure
+- Parallel Dots API
+- HTML5 / CSS3
+- Razor views
 
 ## Getting Started
 
@@ -32,26 +35,21 @@ Clone this repository to your local machine.
 ```
 $ git clone https://github.com/ProjectAMANDA/AmandaFE.git
 ```
-Once downloaded, cd into the ```AmandaFE``` directory.
+Once downloaded, you can either use the dotnet CLI utilities or Visual Studio 2017 (or greater) to build the web application. The solution file is located in the AmandaFE subdirectory at the root of the repository.
 ```
-$ cd AmandFE
+cd AmandaFE/AmandaFE
+dotnet build
 ```
-The cd into ```AmandaFE``` directory.
+The dotnet tools will automatically restore any NuGet dependencies. Before running the application, the provided code-first migration will need to be applied to the SQL server of your choice configured in the /AmandaFE/AmandaFE/appsettings.json file. This requires the Microsoft.EntityFrameworkCore.Tools NuGet package and can be run from the NuGet Package Manager Console:
 ```
-$ cd AmandaFE
+Update-Database
 ```
-The cd into the second ```AmandaFE``` directory.
+Once the database has been created, the application can be run. Options for running and debugging the application using IIS Express or Kestrel are provided within Visual Studio. From the command line, the following will start an instance of the Kestrel server to host the application:
 ```
-$ cd AmandaFE
+cd AmandaFE/AmandaFE
+dotnet run
 ```
-Then run .NET build.
-```
-$ dotnet build
-```
-Once that is complete, run the program.
-```
-$ dotnet run
-```
+Unit testing is included in the AmandaFE/FrontendTesting project using the xUnit test framework. Tests have been provided for models, view models, controllers, and utility classes for the application.
 
 ## Usage
 
