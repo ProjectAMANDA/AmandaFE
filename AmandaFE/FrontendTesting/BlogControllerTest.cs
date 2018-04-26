@@ -316,9 +316,10 @@ namespace FrontendTesting
             }
         }
 
-        // GET /Blog/Create should return a view for creating new blog posts. With no cookie,
-        // the UserName property of the view model should be set to null. Ensure that a ViewResult
-        // is returned with the correct view model.
+        // GET /Blog/Create should return a view for creating new blog posts. With a cookie
+        // present in the user's browser, the user's name should be filled into the view
+        // model from the database. Ensure that the user is identified via their cookie
+        // and filled into the view model.
         [Fact]
         public async void CanGetCreateViewWithCookie()
         {
@@ -366,6 +367,179 @@ namespace FrontendTesting
                 // Assert
                 PostCreateViewModel vrViewModel = vr.Model as PostCreateViewModel;
                 Assert.Equal("Bob", vrViewModel.UserName);
+            }
+        }
+
+        // POST /Blog/Create with a bound PostCreateViewModel object should create a new Post entity
+        // in the database. Ensure that a new Post entity is created by this action.
+        [Fact]
+        public async void CanPostCreateAndAddPost()
+        {
+            DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using (BlogDBContext context = new BlogDBContext(options))
+            {
+                // Arrange
+                BlogController controller = new BlogController(context);
+
+                User testUser = new User()
+                {
+                    Name = "Bob"
+                };
+
+                await context.User.AddAsync(testUser);
+                await context.SaveChangesAsync();
+
+                // MOQ for HttpResponse (needed for cookies)
+                // Use MockBehavior.Loose since we are not going to actually do anything
+                // with the written cookie in this test.
+                var mockCookieCollection = new Mock<IResponseCookies>(MockBehavior.Loose);
+
+                var mockResponse = new Mock<HttpResponse>(MockBehavior.Strict);
+                mockResponse.SetupGet(r => r.Cookies)
+                    .Returns(mockCookieCollection.Object);
+
+                var mockContext = new Mock<HttpContext>();
+                mockContext.SetupGet(c => c.Response)
+                    .Returns(mockResponse.Object);
+
+                // Overwrite the controller's context with our mocked objects to provide
+                // access to cookies in the test
+                controller.ControllerContext = new ControllerContext(new ActionContext(
+                    mockContext.Object, new RouteData(),
+                    new ControllerActionDescriptor()));
+
+                // Compared to the database's posts count after calling Create in the assertion
+                int postCountBeforeCreate = await context.Post.CountAsync();
+
+                // Act
+                RedirectToActionResult ra = await controller.Create(new PostCreateViewModel()
+                {
+                    UserName = testUser.Name,
+                    PostContent = "Hello, world!",
+                    EnrichPost = false,
+                    PostTitle = "Bob's First Post",
+                    Keywords = "cats, dogs"
+                }) as RedirectToActionResult;
+
+                // Assert
+                Assert.Equal(postCountBeforeCreate + 1, await context.Post.CountAsync());
+            }
+        }
+
+        // POST /Blog/Create with a bound PostCreateViewModel object with EnrichPost
+        // set to false should be redirected to the Details action and not to the
+        // Enrich action. Ensure that Create redirects to the correct action.
+        [Fact]
+        public async void CanPostCreatePostWithoutEnrichment()
+        {
+            DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using (BlogDBContext context = new BlogDBContext(options))
+            {
+                // Arrange
+                BlogController controller = new BlogController(context);
+
+                User testUser = new User()
+                {
+                    Name = "Bob"
+                };
+
+                await context.User.AddAsync(testUser);
+                await context.SaveChangesAsync();
+
+                // MOQ for HttpResponse (needed for cookies)
+                // Use MockBehavior.Loose since we are not going to actually do anything
+                // with the written cookie in this test.
+                var mockCookieCollection = new Mock<IResponseCookies>(MockBehavior.Loose);
+
+                var mockResponse = new Mock<HttpResponse>(MockBehavior.Strict);
+                mockResponse.SetupGet(r => r.Cookies)
+                    .Returns(mockCookieCollection.Object);
+
+                var mockContext = new Mock<HttpContext>();
+                mockContext.SetupGet(c => c.Response)
+                    .Returns(mockResponse.Object);
+
+                // Overwrite the controller's context with our mocked objects to provide
+                // access to cookies in the test
+                controller.ControllerContext = new ControllerContext(new ActionContext(
+                    mockContext.Object, new RouteData(),
+                    new ControllerActionDescriptor()));
+
+                // Act
+                RedirectToActionResult ra = await controller.Create(new PostCreateViewModel()
+                {
+                    UserName = testUser.Name,
+                    PostContent = "Hello, world!",
+                    EnrichPost = false,
+                    PostTitle = "Bob's First Post",
+                    Keywords = "cats, dogs"
+                }) as RedirectToActionResult;
+
+                // Assert
+                Assert.Equal("Details", ra.ActionName);
+            }
+        }
+
+        // POST /Blog/Create with a bound PostCreateViewModel object with EnrichPost
+        // set to true should be redirected to the Enrich action and not to the
+        // Details action. Ensure that Create redirects to the correct action.
+        [Fact]
+        public async void CanPostCreatePostWithEnrichment()
+        {
+            DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using (BlogDBContext context = new BlogDBContext(options))
+            {
+                // Arrange
+                BlogController controller = new BlogController(context);
+
+                User testUser = new User()
+                {
+                    Name = "Bob"
+                };
+
+                await context.User.AddAsync(testUser);
+                await context.SaveChangesAsync();
+
+                // MOQ for HttpResponse (needed for cookies)
+                // Use MockBehavior.Loose since we are not going to actually do anything
+                // with the written cookie in this test.
+                var mockCookieCollection = new Mock<IResponseCookies>(MockBehavior.Loose);
+
+                var mockResponse = new Mock<HttpResponse>(MockBehavior.Strict);
+                mockResponse.SetupGet(r => r.Cookies)
+                    .Returns(mockCookieCollection.Object);
+
+                var mockContext = new Mock<HttpContext>();
+                mockContext.SetupGet(c => c.Response)
+                    .Returns(mockResponse.Object);
+
+                // Overwrite the controller's context with our mocked objects to provide
+                // access to cookies in the test
+                controller.ControllerContext = new ControllerContext(new ActionContext(
+                    mockContext.Object, new RouteData(),
+                    new ControllerActionDescriptor()));
+
+                // Act
+                RedirectToActionResult ra = await controller.Create(new PostCreateViewModel()
+                {
+                    UserName = testUser.Name,
+                    PostContent = "Hello, world!",
+                    EnrichPost = true,
+                    PostTitle = "Bob's First Post",
+                    Keywords = "cats, dogs"
+                }) as RedirectToActionResult;
+
+                // Assert
+                Assert.Equal("Enrich", ra.ActionName);
             }
         }
     }
