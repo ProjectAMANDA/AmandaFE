@@ -81,7 +81,7 @@ namespace FrontendTesting
                 UserViewModel vm = vr.Model as UserViewModel;
 
                 // Assert
-                Assert.Equal("Bob's First Post", vm.AllPosts.FirstOrDefault().Title);
+                Assert.Equal("Bob's First Post", vm.AllPosts.FirstOrDefault()?.Title);
             }
         }
 
