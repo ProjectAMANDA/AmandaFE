@@ -104,6 +104,7 @@ namespace FrontendTesting
             Assert.Equal("Fred", post.User.Name);
         }
 
+        /*
         [Fact]
         public void GetRelatedPostsTest()
         {
@@ -119,6 +120,7 @@ namespace FrontendTesting
             // Assert
             Assert.Single(post.RelatedPosts);
         }
+        */
 
         [Fact]
         public void GetImageHrefTest()
@@ -294,6 +296,7 @@ namespace FrontendTesting
             Assert.Equal(57, post.Sentiment);
         }
 
+        /*
         [Fact]
         public void GetKeywordsTest()
         {
@@ -306,7 +309,9 @@ namespace FrontendTesting
             // Assert
             Assert.Equal("Test", post.Keywords);
         }
+        */
 
+        /*
         [Fact]
         public void SetKeywordsTest()
         {
@@ -322,7 +327,7 @@ namespace FrontendTesting
             // Assert
             Assert.Equal("Checkers", post.Keywords);
         }
-
+        */
 
         [Fact]
         public void GetCreationDate()
