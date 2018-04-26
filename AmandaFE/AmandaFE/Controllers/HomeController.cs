@@ -19,6 +19,10 @@ namespace AmandaFE.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Gets and displays all posts from the database on the Index page
+        /// </summary>
+        /// <returns>PostIndexViewModel for all post</returns>
         public async Task<IActionResult> Index()
         {
             return View(new PostIndexViewModel()
@@ -29,6 +33,10 @@ namespace AmandaFE.Controllers
             });
         }
 
+        /// <summary>
+        /// Utilizes the ErrorViewModel if there is a error
+        /// </summary>
+        /// <returns>ErrorViewModel</returns>
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
