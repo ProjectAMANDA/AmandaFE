@@ -696,5 +696,56 @@ namespace FrontendTesting
                     vrViewModel.Sentiment <= 1.0f + float.Epsilon);
             }
         }
+
+        // POST /Blog/Enrich with a bound PostEnrichViewModel object should change the
+        // ImageHref property of the specified post. Ensure that this property is
+        // modified after calling POST /Blog/Enrich
+        [Fact]
+        public async void CanPostEnrichAndChangePostImageHref()
+        {
+            DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using (BlogDBContext context = new BlogDBContext(options))
+            {
+                // Arrange
+                BlogController controller = new BlogController(context);
+
+                User testUser = new User()
+                {
+                    Name = "Bob"
+                };
+
+                await context.User.AddAsync(testUser);
+                await context.SaveChangesAsync();
+
+                Post testPost = new Post()
+                {
+                    Content = "Hello, world!",
+                    CreationDate = DateTime.Today,
+                    ImageHref = "http://not.a.real/website.png",
+                    Sentiment = 0.625f,
+                    Summary = "Hello, world!",
+                    Title = "Bob's First Post",
+                    UserId = testUser.Id
+                };
+
+                await context.Post.AddAsync(testPost);
+                await context.SaveChangesAsync();
+
+                // Act
+                // Simulate the user selecting an image from the Enrich view and
+                // enrich the specified post (corresponding to testPost)
+                await controller.Enrich(new PostEnrichViewModel
+                {
+                    PostId = testPost.Id,
+                    SelectedImageHref = "http://also.not.a/real/website.png"
+                });
+
+                // Assert
+                Assert.Equal("http://also.not.a/real/website.png", (await context.Post.FirstAsync()).ImageHref);
+            }
+        }
     }
 }
