@@ -1,6 +1,10 @@
 # Project A.M.A.N.D.A.
 
-## Web App
+## We are deployed on Azure!
+
+http://projectamandafe.azurewebsites.net/
+
+## Web Application
 
 The web application consists of a frontend written in Razor views, HTML, CSS,
 Bootstrap, Popper, and jQuery. The backend was written in C# using ASP.NET Core 2, Entity Framework Core, and the MVC framework.
