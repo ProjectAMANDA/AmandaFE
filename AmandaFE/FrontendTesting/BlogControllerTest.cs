@@ -700,6 +700,9 @@ namespace FrontendTesting
         // POST /Blog/Enrich with a bound PostEnrichViewModel object should change the
         // ImageHref property of the specified post. Ensure that this property is
         // modified after calling POST /Blog/Enrich
+
+        // TODO(taylorjoshuaw): Add tests for the redirects that occur on success
+        //                      and on failure.
         [Fact]
         public async void CanPostEnrichAndChangePostImageHref()
         {
@@ -745,6 +748,153 @@ namespace FrontendTesting
 
                 // Assert
                 Assert.Equal("http://also.not.a/real/website.png", (await context.Post.FirstAsync()).ImageHref);
+            }
+        }
+
+        // GET /Blog/Details/{id?} should return the Details view for valid post id's.
+        // Ensure that a ViewResult is returned when a valid id is provided.
+        [Fact]
+        public async void CanGetDetailsViewForValidPost()
+        {
+            DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using (BlogDBContext context = new BlogDBContext(options))
+            {
+                // Arrange
+                BlogController controller = new BlogController(context);
+
+                User testUser = new User()
+                {
+                    Name = "Bob"
+                };
+
+                await context.User.AddAsync(testUser);
+                await context.SaveChangesAsync();
+
+                Post testPost = new Post()
+                {
+                    Content = "Hello, world!",
+                    CreationDate = DateTime.Today,
+                    ImageHref = "http://not.a.real/website.png",
+                    Sentiment = 0.625f,
+                    Summary = "Hello, world!",
+                    Title = "Bob's First Post",
+                    UserId = testUser.Id
+                };
+
+                await context.Post.AddAsync(testPost);
+                await context.SaveChangesAsync();
+
+                // Act
+                IActionResult vr = await controller.Details(testPost.Id);
+
+                // Assert
+                Assert.IsType<ViewResult>(vr);
+            }
+        }
+
+        // GET /Blog/Details/{id?} should redirect the user to the Index action if a null
+        // or invalid id is provided. Ensure that an invalid id results in a redirect
+        [Fact]
+        public async void CanGetDetailsAndRedirectWithInvalidId()
+        {
+            DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using (BlogDBContext context = new BlogDBContext(options))
+            {
+                // Arrange
+                BlogController controller = new BlogController(context);
+
+                User testUser = new User()
+                {
+                    Name = "Bob"
+                };
+
+                await context.User.AddAsync(testUser);
+                await context.SaveChangesAsync();
+
+                Post testPost = new Post()
+                {
+                    Content = "Hello, world!",
+                    CreationDate = DateTime.Today,
+                    ImageHref = "http://not.a.real/website.png",
+                    Sentiment = 0.625f,
+                    Summary = "Hello, world!",
+                    Title = "Bob's First Post",
+                    UserId = testUser.Id
+                };
+
+                await context.Post.AddAsync(testPost);
+                await context.SaveChangesAsync();
+
+                // Act
+                // Adding 1 to the id of testPost will always be an invalid id since the database
+                // only contains 1 post.
+                IActionResult vr = await controller.Details(testPost.Id + 1);
+
+                // Assert
+                Assert.IsType<RedirectToActionResult>(vr);
+            }
+        }
+
+        // GET /Blog/Details/{id?} should not only fetch the specified post but also
+        // any keywords associated with it. Ensure that the correct number of keywords
+        // are added to the view model when returning the ViewResult.
+        [Fact]
+        public async void CanGetDetailsWithViewModelContainingKeywords()
+        {
+            DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using (BlogDBContext context = new BlogDBContext(options))
+            {
+                // Arrange
+                BlogController controller = new BlogController(context);
+
+                User testUser = new User()
+                {
+                    Name = "Bob"
+                };
+
+                await context.User.AddAsync(testUser);
+                await context.SaveChangesAsync();
+
+                Post testPost = new Post()
+                {
+                    Content = "Hello, world!",
+                    CreationDate = DateTime.Today,
+                    ImageHref = "http://not.a.real/website.png",
+                    Sentiment = 0.625f,
+                    Summary = "Hello, world!",
+                    Title = "Bob's First Post",
+                    UserId = testUser.Id
+                };
+
+                await context.Post.AddAsync(testPost);
+                await context.SaveChangesAsync();
+
+                // Add Keyword entities and relate them to testPost via the PostKeyword
+                // junction table to test that the PostDetailViewModel is populated with
+                // keywords properly.
+                await KeywordUtilities.MergeKeywordStringIntoPostAsync("cats, dogs", testPost.Id, context);
+
+                // Act
+                ViewResult vr = await controller.Details(testPost.Id) as ViewResult;
+
+                // Assert
+                PostDetailViewModel vrViewModel = vr.Model as PostDetailViewModel;
+
+                // Retrieve the count of keywords that should be associated with testPost to
+                // compare with the view model in our assertion below
+                int expectedKeywordCount = await context.PostKeyword.Where(pk => pk.PostId == testPost.Id)
+                                                                    .CountAsync();
+
+                Assert.Equal(expectedKeywordCount, vrViewModel.Keywords.Count());
             }
         }
     }
