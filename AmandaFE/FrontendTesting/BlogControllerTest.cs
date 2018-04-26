@@ -542,5 +542,159 @@ namespace FrontendTesting
                 Assert.Equal("Enrich", ra.ActionName);
             }
         }
+
+        // GET /Blog/Enrich/{id?} with a valid Post entity id should present the Enrich view
+        // for the specified entity. Ensure that a ViewResult is returned from this action
+        // when a valid id is provided.
+        [Fact]
+        public async void CanGetEnrichView()
+        {
+            DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using (BlogDBContext context = new BlogDBContext(options))
+            {
+                // Arrange
+                BlogController controller = new BlogController(context);
+
+                User testUser = new User()
+                {
+                    Name = "Bob"
+                };
+
+                await context.User.AddAsync(testUser);
+                await context.SaveChangesAsync();
+
+                Post testPost = new Post()
+                {
+                    Content = "Hello, world!",
+                    CreationDate = DateTime.Today,
+                    ImageHref = "http://not.a.real/website.png",
+                    Sentiment = 0.625f,
+                    Summary = "Hello, world!",
+                    Title = "Bob's First Post",
+                    UserId = testUser.Id
+                };
+
+                await context.Post.AddAsync(testPost);
+                await context.SaveChangesAsync();
+
+                // Add in keywords to pass to the ProjectAMANDA REST API in Enrich
+                await KeywordUtilities.MergeKeywordStringIntoPostAsync("cats, dogs", testPost.Id, context);
+
+                // Act
+                IActionResult ar = await controller.Enrich(testPost.Id);
+
+                // Assert
+                Assert.IsType<ViewResult>(ar);
+            }
+        }
+
+        // GET /Blog/Enrich/{id?} with a valid Post entity id should present the Enrich view
+        // for the specified entity. Ensure that a ViewResult is returned from this action
+        // when a valid id is provided and that its view model contains image results from
+        // third party API's via the ProjectAMANDA REST API
+        [Fact]
+        public async void CanGetEnrichViewWithViewModelContainingImages()
+        {
+            DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using (BlogDBContext context = new BlogDBContext(options))
+            {
+                // Arrange
+                BlogController controller = new BlogController(context);
+
+                User testUser = new User()
+                {
+                    Name = "Bob"
+                };
+
+                await context.User.AddAsync(testUser);
+                await context.SaveChangesAsync();
+
+                Post testPost = new Post()
+                {
+                    Content = "Hello, world!",
+                    CreationDate = DateTime.Today,
+                    ImageHref = "http://not.a.real/website.png",
+                    Sentiment = 0.625f,
+                    Summary = "Hello, world!",
+                    Title = "Bob's First Post",
+                    UserId = testUser.Id
+                };
+
+                await context.Post.AddAsync(testPost);
+                await context.SaveChangesAsync();
+
+                // Add in keywords to pass to the ProjectAMANDA REST API in Enrich
+                await KeywordUtilities.MergeKeywordStringIntoPostAsync("cats, dogs", testPost.Id, context);
+
+                // Act
+                ViewResult vr = await controller.Enrich(testPost.Id) as ViewResult;
+
+                // Assert
+                PostEnrichViewModel vrViewModel = vr.Model as PostEnrichViewModel;
+                Assert.NotEmpty(vrViewModel.Images);
+            }
+        }
+
+        // GET /Blog/Enrich/{id?} with a valid Post entity id should present the Enrich view
+        // for the specified entity. Ensure that a ViewResult is returned from this action
+        // when a valid id is provided and that its view model contains sentiment from Azure
+        // Cognitve Services (scores 0.0 - 1.0 indicate Azure enrichment; -1.0 indicates no
+        // Azure enrichment)
+        [Fact]
+        public async void CanGetEnrichViewWithViewModelContainingSentiment()
+        {
+            DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using (BlogDBContext context = new BlogDBContext(options))
+            {
+                // Arrange
+                BlogController controller = new BlogController(context);
+
+                User testUser = new User()
+                {
+                    Name = "Bob"
+                };
+
+                await context.User.AddAsync(testUser);
+                await context.SaveChangesAsync();
+
+                Post testPost = new Post()
+                {
+                    Content = "Hello, world!",
+                    CreationDate = DateTime.Today,
+                    ImageHref = "http://not.a.real/website.png",
+                    Sentiment = 0.625f,
+                    Summary = "Hello, world!",
+                    Title = "Bob's First Post",
+                    UserId = testUser.Id
+                };
+
+                await context.Post.AddAsync(testPost);
+                await context.SaveChangesAsync();
+
+                // Add in keywords to pass to the ProjectAMANDA REST API in Enrich
+                await KeywordUtilities.MergeKeywordStringIntoPostAsync("cats, dogs", testPost.Id, context);
+
+                // Act
+                ViewResult vr = await controller.Enrich(testPost.Id) as ViewResult;
+
+                // Assert
+                PostEnrichViewModel vrViewModel = vr.Model as PostEnrichViewModel;
+
+                // Sentiment values of 0.0 to 1.0 indicate enrichment from Azure
+                // Cognitive Services. Ranges take into account 32-bit IEEE 754
+                // epsilons to protect against floating point errors.
+                Assert.True(vrViewModel.Sentiment >= 0.0f - float.Epsilon &&
+                    vrViewModel.Sentiment <= 1.0f + float.Epsilon);
+            }
+        }
     }
 }
