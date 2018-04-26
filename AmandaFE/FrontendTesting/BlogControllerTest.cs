@@ -897,5 +897,67 @@ namespace FrontendTesting
                 Assert.Equal(expectedKeywordCount, vrViewModel.Keywords.Count());
             }
         }
+
+        // GET /Blog/Find would have been removed were it not for the code freeze. Currently,
+        // it returns a view with every post in the database as a list for the model. This
+        // will be confirmed to provide coverage of this method.
+        [Fact]
+        public async void CanGetViewWithAllPostsFromFindAction()
+        {
+            DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using (BlogDBContext context = new BlogDBContext(options))
+            {
+                // Arrange
+                BlogController controller = new BlogController(context);
+
+                User testUser = new User()
+                {
+                    Name = "Bob"
+                };
+
+                await context.User.AddAsync(testUser);
+                await context.SaveChangesAsync();
+
+                Post testPost = new Post()
+                {
+                    Content = "Hello, world!",
+                    CreationDate = DateTime.Today,
+                    ImageHref = "http://not.a.real/website.png",
+                    Sentiment = 0.625f,
+                    Summary = "Hello, world!",
+                    Title = "Bob's First Post",
+                    UserId = testUser.Id
+                };
+
+                Post testPost2 = new Post()
+                {
+                    Content = "Goodbye, world!",
+                    CreationDate = DateTime.Today,
+                    ImageHref = "http://not.a.real/website.png",
+                    Sentiment = 0.625f,
+                    Summary = "Hello, world!",
+                    Title = "Bob's Second Post",
+                    UserId = testUser.Id
+                };
+
+                await context.Post.AddAsync(testPost);
+                await context.Post.AddAsync(testPost2);
+                await context.SaveChangesAsync();
+
+                // Act
+                // IDE's will likely note that the Find action is obsolete
+                ViewResult vr = await controller.Find(null) as ViewResult;
+
+                // Assert
+                List<Post> posts = vr.Model as List<Post>;
+                // Check against the database as the post count authority for
+                // this test.
+                Assert.Equal(await context.Post.CountAsync(), posts.Count);
+            }
+        }
+
     }
 }
