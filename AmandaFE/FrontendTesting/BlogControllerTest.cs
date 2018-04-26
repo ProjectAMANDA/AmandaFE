@@ -996,11 +996,6 @@ namespace FrontendTesting
                 await context.Post.AddAsync(testPost);
                 await context.SaveChangesAsync();
 
-                // Add Keyword entities and relate them to testPost via the PostKeyword
-                // junction table to test that the PostDetailViewModel is populated with
-                // keywords properly.
-                await KeywordUtilities.MergeKeywordStringIntoPostAsync("cats, dogs", testPost.Id, context);
-
                 // Act
                 IActionResult ar = await controller.Edit(testPost.Id);
 
@@ -1045,11 +1040,6 @@ namespace FrontendTesting
 
                 await context.Post.AddAsync(testPost);
                 await context.SaveChangesAsync();
-
-                // Add Keyword entities and relate them to testPost via the PostKeyword
-                // junction table to test that the PostDetailViewModel is populated with
-                // keywords properly.
-                await KeywordUtilities.MergeKeywordStringIntoPostAsync("cats, dogs", testPost.Id, context);
 
                 // Act
                 // Adding 1 to the id of testPost will ensure that it is an invalid id
@@ -1098,17 +1088,144 @@ namespace FrontendTesting
                 await context.Post.AddAsync(testPost);
                 await context.SaveChangesAsync();
 
-                // Add Keyword entities and relate them to testPost via the PostKeyword
-                // junction table to test that the PostDetailViewModel is populated with
-                // keywords properly.
-                await KeywordUtilities.MergeKeywordStringIntoPostAsync("cats, dogs", testPost.Id, context);
-
                 // Act
                 ViewResult ar = await controller.Edit(testPost.Id) as ViewResult;
 
                 // Assert
                 Post post = ar.Model as Post;
                 Assert.Equal("Hello, world!", post.Content);
+            }
+        }
+
+        [Fact]
+        public async void CanGetDeleteViewWithValidId()
+        {
+            DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using (BlogDBContext context = new BlogDBContext(options))
+            {
+                // Arrange
+                BlogController controller = new BlogController(context);
+
+                User testUser = new User()
+                {
+                    Name = "Bob"
+                };
+
+                await context.User.AddAsync(testUser);
+                await context.SaveChangesAsync();
+
+                Post testPost = new Post()
+                {
+                    Content = "Hello, world!",
+                    CreationDate = DateTime.Today,
+                    ImageHref = "http://not.a.real/website.png",
+                    Sentiment = 0.625f,
+                    Summary = "Hello, world!",
+                    Title = "Bob's First Post",
+                    UserId = testUser.Id
+                };
+
+                await context.Post.AddAsync(testPost);
+                await context.SaveChangesAsync();
+
+                // Act
+                IActionResult ar = await controller.Delete(testPost.Id);
+
+                // Assert
+                Assert.IsType<ViewResult>(ar);
+            }
+        }
+
+        [Fact]
+        public async void CannotGetDeleteViewWithInvalidId()
+        {
+            DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using (BlogDBContext context = new BlogDBContext(options))
+            {
+                // Arrange
+                BlogController controller = new BlogController(context);
+
+                User testUser = new User()
+                {
+                    Name = "Bob"
+                };
+
+                await context.User.AddAsync(testUser);
+                await context.SaveChangesAsync();
+
+                Post testPost = new Post()
+                {
+                    Content = "Hello, world!",
+                    CreationDate = DateTime.Today,
+                    ImageHref = "http://not.a.real/website.png",
+                    Sentiment = 0.625f,
+                    Summary = "Hello, world!",
+                    Title = "Bob's First Post",
+                    UserId = testUser.Id
+                };
+
+                await context.Post.AddAsync(testPost);
+                await context.SaveChangesAsync();
+
+                // Act
+                // Adding 1 to testPost.Id will ensure an invalid id since the database
+                // only contains 1 post.
+                IActionResult ar = await controller.Delete(testPost.Id + 1);
+
+                // Assert
+                Assert.IsType<NotFoundResult>(ar);
+            }
+        }
+
+        [Fact]
+        public async void CanPostDeleteAndRemovePost()
+        {
+            DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using (BlogDBContext context = new BlogDBContext(options))
+            {
+                // Arrange
+                BlogController controller = new BlogController(context);
+
+                User testUser = new User()
+                {
+                    Name = "Bob"
+                };
+
+                await context.User.AddAsync(testUser);
+                await context.SaveChangesAsync();
+
+                Post testPost = new Post()
+                {
+                    Content = "Hello, world!",
+                    CreationDate = DateTime.Today,
+                    ImageHref = "http://not.a.real/website.png",
+                    Sentiment = 0.625f,
+                    Summary = "Hello, world!",
+                    Title = "Bob's First Post",
+                    UserId = testUser.Id
+                };
+
+                await context.Post.AddAsync(testPost);
+                await context.SaveChangesAsync();
+
+                // Used in the assertion below to ensure that the post has truly
+                // been deleted.
+                int postCountBeforeDelete = await context.Post.CountAsync();
+
+                // Act
+                ViewResult vr = await controller.DeleteConfirmed(testPost.Id) as ViewResult;
+
+                // Assert
+                Assert.Equal(postCountBeforeDelete - 1, await context.Post.CountAsync());
             }
         }
     }
