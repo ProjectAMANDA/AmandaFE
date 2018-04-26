@@ -959,5 +959,157 @@ namespace FrontendTesting
             }
         }
 
+        // GET /Blog/Edit/{id?} should return a ViewResult with the Post entity corresponding
+        // to the provided id as its model. Ensure that a valid id passed to this action
+        // results in a ViewResult
+        [Fact]
+        public async void CanGetEditViewWithValidId()
+        {
+            DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using (BlogDBContext context = new BlogDBContext(options))
+            {
+                // Arrange
+                BlogController controller = new BlogController(context);
+
+                User testUser = new User()
+                {
+                    Name = "Bob"
+                };
+
+                await context.User.AddAsync(testUser);
+                await context.SaveChangesAsync();
+
+                Post testPost = new Post()
+                {
+                    Content = "Hello, world!",
+                    CreationDate = DateTime.Today,
+                    ImageHref = "http://not.a.real/website.png",
+                    Sentiment = 0.625f,
+                    Summary = "Hello, world!",
+                    Title = "Bob's First Post",
+                    UserId = testUser.Id
+                };
+
+                await context.Post.AddAsync(testPost);
+                await context.SaveChangesAsync();
+
+                // Add Keyword entities and relate them to testPost via the PostKeyword
+                // junction table to test that the PostDetailViewModel is populated with
+                // keywords properly.
+                await KeywordUtilities.MergeKeywordStringIntoPostAsync("cats, dogs", testPost.Id, context);
+
+                // Act
+                IActionResult ar = await controller.Edit(testPost.Id);
+
+                // Assert
+                Assert.IsType<ViewResult>(ar);
+            }
+        }
+
+        // GET /Blog/Edit/{id?} should result in a NotFoundResult if an invalid or null
+        // id is provided. Ensure that NotFoundResult is returned with an invalid id
+        // rather than ViewResult.
+        [Fact]
+        public async void CannotGetEditViewWithInvalidId()
+        {
+            DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using (BlogDBContext context = new BlogDBContext(options))
+            {
+                // Arrange
+                BlogController controller = new BlogController(context);
+
+                User testUser = new User()
+                {
+                    Name = "Bob"
+                };
+
+                await context.User.AddAsync(testUser);
+                await context.SaveChangesAsync();
+
+                Post testPost = new Post()
+                {
+                    Content = "Hello, world!",
+                    CreationDate = DateTime.Today,
+                    ImageHref = "http://not.a.real/website.png",
+                    Sentiment = 0.625f,
+                    Summary = "Hello, world!",
+                    Title = "Bob's First Post",
+                    UserId = testUser.Id
+                };
+
+                await context.Post.AddAsync(testPost);
+                await context.SaveChangesAsync();
+
+                // Add Keyword entities and relate them to testPost via the PostKeyword
+                // junction table to test that the PostDetailViewModel is populated with
+                // keywords properly.
+                await KeywordUtilities.MergeKeywordStringIntoPostAsync("cats, dogs", testPost.Id, context);
+
+                // Act
+                // Adding 1 to the id of testPost will ensure that it is an invalid id
+                // since there is only one post in the database.
+                IActionResult ar = await controller.Edit(testPost.Id + 1);
+
+                // Assert
+                Assert.IsType<NotFoundResult>(ar);
+            }
+        }
+
+        // GET /Blog/Edit/{id?} should result in a ViewResult containing the Post
+        // entity corresponding with the provided id if it is valid. Ensure that
+        // the model is correct when providing a valid id to the Edit action.
+        [Fact]
+        public async void CanGetViewWithPostModelWithValidId()
+        {
+            DbContextOptions<BlogDBContext> options = new DbContextOptionsBuilder<BlogDBContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using (BlogDBContext context = new BlogDBContext(options))
+            {
+                // Arrange
+                BlogController controller = new BlogController(context);
+
+                User testUser = new User()
+                {
+                    Name = "Bob"
+                };
+
+                await context.User.AddAsync(testUser);
+                await context.SaveChangesAsync();
+
+                Post testPost = new Post()
+                {
+                    Content = "Hello, world!",
+                    CreationDate = DateTime.Today,
+                    ImageHref = "http://not.a.real/website.png",
+                    Sentiment = 0.625f,
+                    Summary = "Hello, world!",
+                    Title = "Bob's First Post",
+                    UserId = testUser.Id
+                };
+
+                await context.Post.AddAsync(testPost);
+                await context.SaveChangesAsync();
+
+                // Add Keyword entities and relate them to testPost via the PostKeyword
+                // junction table to test that the PostDetailViewModel is populated with
+                // keywords properly.
+                await KeywordUtilities.MergeKeywordStringIntoPostAsync("cats, dogs", testPost.Id, context);
+
+                // Act
+                ViewResult ar = await controller.Edit(testPost.Id) as ViewResult;
+
+                // Assert
+                Post post = ar.Model as Post;
+                Assert.Equal("Hello, world!", post.Content);
+            }
+        }
     }
 }
